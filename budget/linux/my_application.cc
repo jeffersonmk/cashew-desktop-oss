@@ -40,14 +40,26 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "budget");
+    gtk_header_bar_set_title(header_bar, "Cashew Desktop");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "budget");
+    gtk_window_set_title(window, "Cashew Desktop");
   }
 
   gtk_window_set_default_size(window, 1280, 720);
+
+  // Window icon (taskbar / alt-tab). Installed next to the binary under
+  // data/, so it works both from the build folder and once packaged.
+  {
+    g_autofree gchar* exe_path = g_file_read_link("/proc/self/exe", nullptr);
+    if (exe_path != nullptr) {
+      g_autofree gchar* exe_dir = g_path_get_dirname(exe_path);
+      g_autofree gchar* icon_path =
+          g_build_filename(exe_dir, "data", "app_icon.png", nullptr);
+      gtk_window_set_icon_from_file(window, icon_path, nullptr);
+    }
+  }
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
@@ -117,6 +129,9 @@ static void my_application_class_init(MyApplicationClass* klass) {
 static void my_application_init(MyApplication* self) {}
 
 MyApplication* my_application_new() {
+  // Use the application id as the Wayland app_id / X11 WM_CLASS so desktop
+  // environments match the window with the installed .desktop file and icon.
+  g_set_prgname(APPLICATION_ID);
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", APPLICATION_ID,
                                      "flags", G_APPLICATION_NON_UNIQUE,

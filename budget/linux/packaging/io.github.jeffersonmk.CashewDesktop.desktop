@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Cashew Desktop
+GenericName=Budget Manager
+GenericName[pt_BR]=Gerenciador de Orçamento
+Comment=Manage your budget and expenses, stored locally
+Comment[pt_BR]=Controle seu orçamento e gastos, com dados salvos localmente
+Exec=cashew-desktop
+Icon=io.github.jeffersonmk.CashewDesktop
+Terminal=false
+Categories=Office;Finance;
+Keywords=budget;finance;money;expenses;orçamento;finanças;gastos;
+StartupWMClass=io.github.jeffersonmk.CashewDesktop

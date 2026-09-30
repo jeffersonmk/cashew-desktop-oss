@@ -1,3 +1,4 @@
+import 'package:budget/struct/migrateDataFolder.dart';
 import 'package:budget/struct/localTimezone.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/accountsPage.dart';
@@ -41,6 +42,8 @@ bool allowDangerousDebugFlags = kDebugMode;
 void main() async {
   captureLogs(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    // Must run before anything reads SharedPreferences (EasyLocalization does).
+    await migrateOldDataFolder();
     await EasyLocalization.ensureInitialized();
     sharedPreferences = await SharedPreferences.getInstance();
     database = await constructDb('db');
@@ -102,7 +105,7 @@ class App extends StatelessWidget {
       themeAnimationDuration: Duration(milliseconds: 400),
       themeAnimationCurve: CustomDelayedCurve(),
       key: ValueKey('CashewAppMain'),
-      title: 'Cashew',
+      title: 'Cashew Desktop',
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
       scrollBehavior: ScrollBehaviorOverride(),
