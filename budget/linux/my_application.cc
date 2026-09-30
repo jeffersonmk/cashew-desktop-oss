@@ -14,12 +14,116 @@ struct _MyApplication {
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
+// ---------------------------------------------------------------------------
+// Cashew Desktop: remember the window size (and position where the system
+// allows it) between runs. Stored in
+//   ~/.config/io.github.jeffersonmk.CashewDesktop/window.ini
+// Wayland does not let apps read or set their own position, so there only the
+// size and the maximized state are restored; on X11 the position is too.
+// ---------------------------------------------------------------------------
+static const gint kDefaultWidth = 1280;
+static const gint kDefaultHeight = 720;
+static const gint kMinSize = 360;
+
+static gchar* window_state_path() {
+  return g_build_filename(g_get_user_config_dir(), APPLICATION_ID,
+                          "window.ini", nullptr);
+}
+
+static gboolean running_on_x11(GtkWindow* window) {
+#ifdef GDK_WINDOWING_X11
+  return GDK_IS_X11_DISPLAY(gtk_widget_get_display(GTK_WIDGET(window)));
+#else
+  return FALSE;
+#endif
+}
+
+static void restore_window_state(GtkWindow* window) {
+  gint width = kDefaultWidth, height = kDefaultHeight;
+  g_autofree gchar* path = window_state_path();
+  g_autoptr(GKeyFile) file = g_key_file_new();
+  if (!g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr)) {
+    gtk_window_set_default_size(window, width, height);
+    return;
+  }
+  g_autoptr(GError) error = nullptr;
+  gint w = g_key_file_get_integer(file, "window", "width", &error);
+  if (error == nullptr && w >= kMinSize) width = w;
+  g_clear_error(&error);
+  gint h = g_key_file_get_integer(file, "window", "height", &error);
+  if (error == nullptr && h >= kMinSize) height = h;
+  g_clear_error(&error);
+  gtk_window_set_default_size(window, width, height);
+
+  if (running_on_x11(window) && g_key_file_has_key(file, "window", "x", nullptr) &&
+      g_key_file_has_key(file, "window", "y", nullptr)) {
+    gint x = g_key_file_get_integer(file, "window", "x", nullptr);
+    gint y = g_key_file_get_integer(file, "window", "y", nullptr);
+    // Only restore the position if it is still on a connected monitor.
+    GdkDisplay* display = gtk_widget_get_display(GTK_WIDGET(window));
+    GdkMonitor* monitor = gdk_display_get_monitor_at_point(display, x + 50, y + 50);
+    if (monitor != nullptr) {
+      GdkRectangle area;
+      gdk_monitor_get_workarea(monitor, &area);
+      if (x + 50 >= area.x && y + 50 >= area.y &&
+          x + 50 < area.x + area.width && y + 50 < area.y + area.height) {
+        gtk_window_move(window, x, y);
+      }
+    }
+  }
+
+  if (g_key_file_get_boolean(file, "window", "maximized", nullptr)) {
+    gtk_window_maximize(window);
+  }
+}
+
+static void save_window_state(GtkWindow* window) {
+  g_autofree gchar* path = window_state_path();
+  g_autofree gchar* dir = g_path_get_dirname(path);
+  g_mkdir_with_parents(dir, 0700);
+
+  g_autoptr(GKeyFile) file = g_key_file_new();
+  // Keep the last normal size when closing while maximized.
+  g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr);
+
+  // Tiling compositors (e.g. Hyprland) report every window as maximized and
+  // tiled, even floating ones. Only treat the window as maximized when it is
+  // maximized and not tiled; otherwise remember its current size.
+  GdkWindow* gdk_window = gtk_widget_get_window(GTK_WIDGET(window));
+  GdkWindowState state =
+      gdk_window != nullptr ? gdk_window_get_state(gdk_window)
+                            : (GdkWindowState)0;
+  gboolean tiled = (state & GDK_WINDOW_STATE_TILED) != 0;
+  gboolean maximized = gtk_window_is_maximized(window) && !tiled;
+  g_key_file_set_boolean(file, "window", "maximized", maximized);
+  if (!maximized) {
+    gint width = 0, height = 0;
+    gtk_window_get_size(window, &width, &height);
+    if (width >= kMinSize && height >= kMinSize) {
+      g_key_file_set_integer(file, "window", "width", width);
+      g_key_file_set_integer(file, "window", "height", height);
+    }
+    if (running_on_x11(window)) {
+      gint x = 0, y = 0;
+      gtk_window_get_position(window, &x, &y);
+      g_key_file_set_integer(file, "window", "x", x);
+      g_key_file_set_integer(file, "window", "y", y);
+    }
+  }
+
+  g_autoptr(GError) error = nullptr;
+  if (!g_key_file_save_to_file(file, path, &error)) {
+    g_warning("Could not save window state: %s", error->message);
+  }
+}
+
 // Cashew Desktop: closing the window used to crash the app (segfault inside
 // the Flutter engine while GTK destroyed the window). Instead of letting GTK
 // destroy the window, hide it and stop the application's main loop; the
 // process then exits normally from main().
 static gboolean on_window_delete(GtkWidget* widget, GdkEvent* event,
                                  gpointer user_data) {
+  save_window_state(GTK_WINDOW(widget));
   gtk_widget_hide(widget);
   g_application_quit(G_APPLICATION(user_data));
   return TRUE;  // don't destroy the window
@@ -58,7 +162,7 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "Cashew Desktop");
   }
 
-  gtk_window_set_default_size(window, 1280, 720);
+  restore_window_state(window);
 
   // Window icon (taskbar / alt-tab). Installed next to the binary under
   // data/, so it works both from the build folder and once packaged.
@@ -117,9 +221,16 @@ static void my_application_startup(GApplication* application) {
 
 // Implements GApplication::shutdown.
 static void my_application_shutdown(GApplication* application) {
-  //MyApplication* self = MY_APPLICATION(object);
-
-  // Perform any actions required at application shutdown.
+  // Quitting without closing the window (e.g. Ctrl+Q) skips delete-event, so
+  // save the window state here too if the window is still visible.
+  for (GList* l = gtk_application_get_windows(GTK_APPLICATION(application));
+       l != nullptr; l = l->next) {
+    GtkWindow* window = GTK_WINDOW(l->data);
+    if (gtk_widget_get_visible(GTK_WIDGET(window))) {
+      save_window_state(window);
+      gtk_widget_hide(GTK_WIDGET(window));
+    }
+  }
 
   G_APPLICATION_CLASS(my_application_parent_class)->shutdown(application);
 }

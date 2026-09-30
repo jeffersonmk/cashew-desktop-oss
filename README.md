@@ -50,6 +50,21 @@ Where your data lives on Linux:
 | Database | `~/.local/share/io.github.jeffersonmk.CashewDesktop/db.sqlite` |
 | Backups (default) | `~/.local/share/io.github.jeffersonmk.CashewDesktop/backups/` |
 
+## Keyboard shortcuts
+
+| Action | Keys |
+|---|---|
+| New transaction | `Ctrl + N` |
+| Search transactions | `Ctrl + F` |
+| Home / Transactions / Budgets / More | `Ctrl + 1` … `Ctrl + 4` |
+| Backups | `Ctrl + B` |
+| Back / close | `Esc` |
+| Quit | `Ctrl + Q` |
+| Show all shortcuts | `Ctrl + /` or `F1` |
+
+The window size is remembered between runs
+(`~/.config/io.github.jeffersonmk.CashewDesktop/window.ini`).
+
 ## Privacy
 
 - Your financial data is stored **only on your computer** (see the paths
@@ -123,6 +138,7 @@ Debug builds print the app logs to the terminal.
 - [ ] Flatpak
 - [ ] Windows build
 - [ ] Local attachments
+- [x] Keyboard shortcuts and remembered window size
 - [ ] Desktop notifications
 
 ## Contact
