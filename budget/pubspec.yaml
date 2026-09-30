@@ -83,7 +83,6 @@ dependencies:
   provider: ^6.1.2
   in_app_review: ^2.0.9 
   flutter_timezone: ^1.0.8
-  device_preview: ^1.1.0 
   scrollable_positioned_list: ^0.3.8
   easy_localization: ^3.0.7
   # simple_shadow: ^0.3.1
@@ -96,7 +95,6 @@ dependencies:
   image_picker: ^1.1.2
   flutter_displaymode: ^0.6.0
   notification_listener_service: ^0.3.3
-  home_widget: ^0.5.0
   material_symbols_icons: ^4.2768.0
   app_links: ^6.1.4
   expandable_page_view: ^1.0.17
