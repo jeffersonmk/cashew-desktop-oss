@@ -50,6 +50,19 @@ Where your data lives on Linux:
 | Database | `~/.local/share/io.github.jeffersonmk.CashewDesktop/db.sqlite` |
 | Backups (default) | `~/.local/share/io.github.jeffersonmk.CashewDesktop/backups/` |
 
+## Download (AppImage)
+
+Get the latest `Cashew_Desktop-*-x86_64.AppImage` from the
+[Releases page](https://github.com/jeffersonmk/cashew-desktop-oss/releases), then:
+
+```bash
+chmod +x Cashew_Desktop-*-x86_64.AppImage
+./Cashew_Desktop-*-x86_64.AppImage
+```
+
+If it does not start, install FUSE 2 (`libfuse2` on Debian/Ubuntu,
+`fuse2` on Arch/Fedora) or run it with `--appimage-extract-and-run`.
+
 ## Install on Linux (from source)
 
 Requirements:
@@ -96,7 +109,8 @@ Debug builds print the app logs to the terminal.
 - [x] Remove Google Sign-In, Google Drive, Gmail and Firebase
 - [x] Local backups
 - [x] Native Linux build, icon and menu entry
-- [ ] AppImage / Flatpak packages
+- [x] AppImage
+- [ ] Flatpak
 - [ ] Windows build
 - [ ] Local attachments
 - [ ] Desktop notifications

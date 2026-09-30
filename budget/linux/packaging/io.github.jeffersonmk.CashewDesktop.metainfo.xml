@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.jeffersonmk.CashewDesktop</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <name>Cashew Desktop</name>
+  <summary>Budget and expense tracker with local-only storage</summary>
+  <description>
+    <p>
+      Cashew Desktop is a native desktop build of the Cashew budget app.
+      It has no cloud and no Google account: your data stays on your computer,
+      with local backups you control.
+    </p>
+    <p>
+      Unofficial fork of Cashew by James Kokoska.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.jeffersonmk.CashewDesktop.desktop</launchable>
+  <url type="homepage">https://github.com/jeffersonmk/cashew-desktop-oss</url>
+  <url type="bugtracker">https://github.com/jeffersonmk/cashew-desktop-oss/issues</url>
+  <developer id="io.github.jeffersonmk">
+    <name>jeffersonmk</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <categories>
+    <category>Office</category>
+    <category>Finance</category>
+  </categories>
+</component>

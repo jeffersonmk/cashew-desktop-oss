@@ -1,0 +1,72 @@
+# Builds the Linux AppImage and attaches it to a GitHub Release.
+#
+# How to publish a new version:
+#   git tag v1.0.0
+#   git push origin v1.0.0
+# The workflow runs, creates the release "v1.0.0" and uploads the AppImage.
+#
+# It can also be started by hand from the Actions tab (workflow_dispatch):
+# that only builds the AppImage and keeps it as a downloadable artifact.
+
+name: Linux AppImage
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  appimage:
+    # Build on an older Ubuntu so the AppImage runs on most distributions
+    # (an AppImage needs a glibc at least as new as the build system's).
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: budget
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev file
+
+      - name: Read Flutter version from .fvmrc
+        id: fvm
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build AppImage
+        env:
+          VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+        run: ./linux/packaging/build-appimage.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cashew_Desktop-AppImage
+          path: budget/build/appimage/*.AppImage
+
+      - name: Publish GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Cashew Desktop ${{ github.ref_name }}
+          files: budget/build/appimage/*.AppImage
+          generate_release_notes: true
