@@ -16,7 +16,9 @@ set -euo pipefail
 
 APP_ID="io.github.jeffersonmk.CashewDesktop"
 BIN_NAME="cashew-desktop"
-APPIMAGETOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+# Pinned release + checksum, so a changed download is rejected.
+APPIMAGETOOL_URL="https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage"
+APPIMAGETOOL_SHA256="ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0"
 
 PACKAGING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$PACKAGING_DIR/../.." && pwd)"
@@ -64,10 +66,17 @@ exec "$HERE/usr/bin/cashew-desktop" "$@"
 EOF
 chmod +x "$APPDIR/AppRun"
 
-TOOL="$OUT_DIR/appimagetool"
-if [[ ! -x "$TOOL" ]]; then
+TOOL="$OUT_DIR/appimagetool-1.9.1"
+if ! echo "$APPIMAGETOOL_SHA256  $TOOL" | sha256sum -c --status 2>/dev/null; then
   echo "==> Downloading appimagetool"
-  curl -fsSL -o "$TOOL" "$APPIMAGETOOL_URL"
+  rm -f "$TOOL"
+  curl -fsSL -o "$TOOL.part" "$APPIMAGETOOL_URL"
+  if ! echo "$APPIMAGETOOL_SHA256  $TOOL.part" | sha256sum -c --status; then
+    rm -f "$TOOL.part"
+    echo "ERROR: appimagetool checksum mismatch, refusing to use it." >&2
+    exit 1
+  fi
+  mv "$TOOL.part" "$TOOL"
   chmod +x "$TOOL"
 fi
 

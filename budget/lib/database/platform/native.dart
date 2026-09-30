@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:drift/drift.dart';
 import 'dart:io';
+import 'package:budget/widgets/accountAndBackup.dart' show restrictToOwner;
 
 // Cashew Desktop OSS: on desktop the database lives in the per-app data
 // folder (Linux: ~/.local/share/<app-id>, Windows: %APPDATA%\<app-id>)
@@ -14,6 +15,7 @@ Future<String> getDatabaseDirectoryPath() async {
   if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
     final Directory dir = await getApplicationSupportDirectory();
     if (!await dir.exists()) await dir.create(recursive: true);
+    await restrictToOwner(dir.path);
     return dir.path;
   }
   return (await getApplicationDocumentsDirectory()).path;

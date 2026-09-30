@@ -81,12 +81,27 @@ Future<Directory> getDefaultLocalBackupDirectory() async {
   return Directory(p.join(base.path, "backups"));
 }
 
+// Financial data: only the current user may read the folder (chmod 700).
+// Home folders are world-readable on some distributions.
+Future<void> restrictToOwner(String path) async {
+  if (!(Platform.isLinux || Platform.isMacOS)) return;
+  try {
+    await Process.run("chmod", ["700", path]);
+  } catch (e) {
+    print("Could not restrict permissions of " + path + ": " + e.toString());
+  }
+}
+
 Future<Directory> getLocalBackupDirectory() async {
   String custom = (appStateSettings["localBackupFolder"] ?? "").toString();
   Directory directory = custom.trim() != ""
       ? Directory(custom)
       : await getDefaultLocalBackupDirectory();
-  if (!await directory.exists()) await directory.create(recursive: true);
+  if (!await directory.exists()) {
+    await directory.create(recursive: true);
+    // Only lock down folders we created, never one the user picked as-is.
+    await restrictToOwner(directory.path);
+  }
   return directory;
 }
 
