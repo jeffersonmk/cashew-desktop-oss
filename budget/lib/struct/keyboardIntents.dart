@@ -24,14 +24,36 @@ const int _backupsPage = 8;
 
 bool _atRootOfNavigation() => !(navigatorKey.currentState?.canPop() ?? false);
 
-// Close any open page/popup so the shortcut starts from the main screen.
-void _popToRoot() {
-  navigatorKey.currentState?.popUntil((route) => route.isFirst);
+// Close open pages/popups one by one so the shortcut starts from the main
+// screen. maybePop respects pages that ask before closing (e.g. "discard
+// changes?" on an unsaved transaction); if a page refuses, stop there and
+// return false so no typed data is lost.
+Future<bool> _popToRoot() async {
+  NavigatorState? navigator = navigatorKey.currentState;
+  if (navigator == null) return false;
+  while (navigator.canPop()) {
+    bool popped = await navigator.maybePop();
+    if (!popped) return false;
+  }
+  return true;
 }
 
-void _goToPage(int page) {
-  _popToRoot();
+Future<void> _goToPage(int page) async {
+  if (!await _popToRoot()) return;
   pageNavigationFrameworkKey.currentState?.changePage(page, switchNavbar: true);
+}
+
+const MethodChannel _windowChannel = MethodChannel("cashew/window");
+
+// Close the app like the window's close button does (the native side saves
+// the window size first). SystemNavigator.pop would destroy the window and
+// crash the Linux engine, so it is only a fallback for other platforms.
+Future<void> quitApp() async {
+  try {
+    await _windowChannel.invokeMethod("quit");
+  } on MissingPluginException {
+    await SystemNavigator.pop();
+  }
 }
 
 bool _shortcutsHelpOpen = false;
@@ -93,8 +115,9 @@ Future<void> openKeyboardShortcutsPopup() async {
 Map<Type, Action<Intent>> keyboardIntents = {
   EscapeIntent: CallbackAction<EscapeIntent>(
     onInvoke: (EscapeIntent intent) {
+      // maybePop: pages with unsaved changes ask before closing.
       if (!_atRootOfNavigation())
-        navigatorKey.currentState!.pop();
+        navigatorKey.currentState!.maybePop();
       else
         pageNavigationFrameworkKey.currentState!
             .changePage(_homePage, switchNavbar: true);
@@ -138,8 +161,7 @@ Map<Type, Action<Intent>> keyboardIntents = {
   ),
   QuitIntent: CallbackAction<QuitIntent>(
     onInvoke: (QuitIntent intent) async {
-      // Same as closing the window: the native side saves the window state.
-      await SystemNavigator.pop();
+      await quitApp();
       return null;
     },
   ),

@@ -20,6 +20,10 @@ How to use:
 - `Ctrl+1` … `Ctrl+4` now switch pages from any screen, not only the main one.
 - The window size is remembered between runs (and the position on X11).
 
+### Fixed
+- Shortcuts that leave a page (`Ctrl+1` … `Ctrl+4`, `Ctrl+B`, `Esc`) now ask
+  before discarding an unsaved transaction instead of closing it.
+
 ## [1.0.2] - 2026-09-30
 
 ### Changed
