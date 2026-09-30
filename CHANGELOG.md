@@ -41,6 +41,8 @@ How to use:
   notifications, About and Data Backup pages. Other languages show English.
 
 ### Fixed
+- Release build: updated `actions/checkout` to v6 (Node.js 24), removing the
+  Node.js 20 deprecation warning.
 - Shortcuts that leave a page (`Ctrl+1` … `Ctrl+4`, `Ctrl+B`, `Esc`) now ask
   before discarding an unsaved transaction instead of closing it.
 
