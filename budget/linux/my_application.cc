@@ -22,6 +22,12 @@ struct _MyApplication {
   GHashTable* notification_payloads;
   guint notification_action_signal;
   guint notification_closed_signal;
+  // Translated labels sent by Dart ("setLabels"); English until then.
+  gchar* label_open_app;
+  gchar* label_quit;
+  gchar* label_notification_open;
+  GtkWidget* tray_open_item;
+  GtkWidget* tray_quit_item;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
@@ -269,11 +275,16 @@ static void enable_tray(MyApplication* self) {
   }
 
   GtkWidget* menu = gtk_menu_new();
-  GtkWidget* open_item = gtk_menu_item_new_with_label("Open Cashew Desktop");
+  GtkWidget* open_item = gtk_menu_item_new_with_label(
+      self->label_open_app != nullptr ? self->label_open_app
+                                      : "Open Cashew Desktop");
+  self->tray_open_item = open_item;
   g_signal_connect(open_item, "activate", G_CALLBACK(on_tray_open), self);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), open_item);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), gtk_separator_menu_item_new());
-  GtkWidget* quit_item = gtk_menu_item_new_with_label("Quit");
+  GtkWidget* quit_item = gtk_menu_item_new_with_label(
+      self->label_quit != nullptr ? self->label_quit : "Quit");
+  self->tray_quit_item = quit_item;
   g_signal_connect(quit_item, "activate", G_CALLBACK(on_tray_quit), self);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), quit_item);
   gtk_widget_show_all(menu);
@@ -287,6 +298,8 @@ static void enable_tray(MyApplication* self) {
 
 static void disable_tray(MyApplication* self) {
   g_clear_object(&self->indicator);
+  self->tray_open_item = nullptr;
+  self->tray_quit_item = nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -353,7 +366,10 @@ static guint32 show_notification(MyApplication* self, const gchar* title,
   g_variant_builder_init(&actions, G_VARIANT_TYPE("as"));
   if (payload != nullptr && payload[0] != '\0') {
     g_variant_builder_add(&actions, "s", "default");
-    g_variant_builder_add(&actions, "s", "Open");
+    g_variant_builder_add(&actions, "s",
+                          self->label_notification_open != nullptr
+                              ? self->label_notification_open
+                              : "Open");
   }
   GVariantBuilder hints;
   g_variant_builder_init(&hints, G_VARIANT_TYPE("a{sv}"));
@@ -462,6 +478,27 @@ static void window_method_call_cb(FlMethodChannel* channel,
                                    body != nullptr ? body : "", payload);
     response = FL_METHOD_RESPONSE(
         fl_method_success_response_new(fl_value_new_int(id)));
+  } else if (g_strcmp0(method, "setLabels") == 0) {
+    const gchar* open_app = map_string(args, "openApp");
+    const gchar* quit = map_string(args, "quit");
+    const gchar* notification_open = map_string(args, "notificationOpen");
+    if (open_app != nullptr) {
+      g_free(self->label_open_app);
+      self->label_open_app = g_strdup(open_app);
+      if (self->tray_open_item != nullptr)
+        gtk_menu_item_set_label(GTK_MENU_ITEM(self->tray_open_item), open_app);
+    }
+    if (quit != nullptr) {
+      g_free(self->label_quit);
+      self->label_quit = g_strdup(quit);
+      if (self->tray_quit_item != nullptr)
+        gtk_menu_item_set_label(GTK_MENU_ITEM(self->tray_quit_item), quit);
+    }
+    if (notification_open != nullptr) {
+      g_free(self->label_notification_open);
+      self->label_notification_open = g_strdup(notification_open);
+    }
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   } else if (g_strcmp0(method, "showWindow") == 0) {
     show_main_window(self);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
@@ -627,6 +664,9 @@ static void my_application_dispose(GObject* object) {
     self->notification_closed_signal = 0;
   }
   g_clear_pointer(&self->notification_payloads, g_hash_table_unref);
+  g_clear_pointer(&self->label_open_app, g_free);
+  g_clear_pointer(&self->label_quit, g_free);
+  g_clear_pointer(&self->label_notification_open, g_free);
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }
 

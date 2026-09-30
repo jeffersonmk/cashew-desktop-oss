@@ -1,3 +1,4 @@
+import 'package:budget/struct/desktopIntegration.dart';
 import 'package:animations/animations.dart';
 import 'package:budget/colors.dart';
 import 'package:budget/database/initializeDefaultDatabase.dart';
@@ -376,6 +377,9 @@ class PageNavigationFrameworkState extends State<PageNavigationFramework> {
       if (isDatabaseCorruptedPopupShown) return;
 
       await initializeNotificationsPlatform();
+      // Cashew Desktop: translations are loaded now; send the tray menu and
+      // notification labels to the native side.
+      await sendDesktopLabels();
 
       bool isChangelogShown = showChangelog(context);
       bool isRatingPopupShown = false;

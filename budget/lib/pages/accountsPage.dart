@@ -216,7 +216,7 @@ class AccountsPageState extends State<AccountsPage> {
           },
         ),
         SettingsContainer(
-          title: "Backup folder",
+          title: "backup-folder".tr(),
           description: backupFolder,
           icon: appStateSettings["outlinedIcons"]
               ? Icons.folder_outlined
@@ -237,7 +237,7 @@ class AccountsPageState extends State<AccountsPage> {
             padding: const EdgeInsetsDirectional.symmetric(
                 horizontal: 20, vertical: 10),
             child: TextFont(
-              text: "No backups yet.",
+              text: "no-backups-yet".tr(),
               fontSize: 15,
               textColor: getColor(context, "textLight"),
             ),

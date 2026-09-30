@@ -1,5 +1,6 @@
 // Cashew Desktop: "Desktop" section in Settings (Linux).
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:budget/struct/desktopIntegration.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/globalSnackbar.dart';
@@ -26,16 +27,16 @@ class _DesktopIntegrationSettingsState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SettingsHeader(title: "Desktop"),
+        SettingsHeader(title: "desktop-integration".tr()),
         Opacity(
           opacity: trayAvailable ? 1 : 0.5,
           child: SettingsContainerSwitch(
-            title: "Keep running in the tray",
+            title: "keep-running-in-tray".tr(),
             descriptionWithValue: (value) => trayAvailable
                 ? (value
-                    ? "Closing the window keeps the app in the tray, so reminders keep working"
-                    : "Closing the window quits the app")
-                : "Not available: no tray found (needs a panel with tray icons and libayatana-appindicator)",
+                    ? "keep-running-in-tray-on".tr()
+                    : "keep-running-in-tray-off".tr())
+                : "tray-not-available-setting".tr(),
             initialValue: appStateSettings["desktopCloseToTray"] == true,
             icon: outlined
                 ? Icons.move_to_inbox_outlined
@@ -43,9 +44,8 @@ class _DesktopIntegrationSettingsState
             onSwitched: (value) async {
               if (!trayAvailable && value == true) {
                 openSnackbar(SnackbarMessage(
-                  title: "Tray not available",
-                  description:
-                      "Your desktop has no tray (system tray / StatusNotifier)",
+                  title: "tray-not-available".tr(),
+                  description: "tray-not-available-description".tr(),
                   icon: Icons.warning_rounded,
                 ));
                 return false;
@@ -59,12 +59,12 @@ class _DesktopIntegrationSettingsState
           ),
         ),
         SettingsContainerSwitch(
-          title: "Start with the system",
+          title: "start-with-system".tr(),
           descriptionWithValue: (value) => value
               ? (appStateSettings["desktopCloseToTray"] == true && trayAvailable
-                  ? "Opens minimized to the tray when you log in"
-                  : "Opens when you log in")
-              : "Off",
+                  ? "start-with-system-tray".tr()
+                  : "start-with-system-on".tr())
+              : "start-with-system-off".tr(),
           initialValue: startWithSystem,
           syncWithInitialValue: false,
           icon: outlined
@@ -74,7 +74,7 @@ class _DesktopIntegrationSettingsState
             bool ok = await setStartWithSystem(value);
             if (!ok) {
               openSnackbar(SnackbarMessage(
-                title: "Could not change the autostart setting",
+                title: "start-with-system-error".tr(),
                 icon: Icons.warning_rounded,
               ));
               return false;

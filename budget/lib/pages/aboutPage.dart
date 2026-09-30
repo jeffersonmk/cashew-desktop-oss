@@ -168,18 +168,18 @@ class AboutPageState extends State<AboutPage> {
       // address baked into every release). Private/security reports: see
       // SECURITY.md in the repository.
       creditCard(
-        role: "Maintainer",
+        role: "maintainer".tr(),
         name: "jeffersonmk",
-        subtitle: "Report a bug or suggest a feature",
+        subtitle: "report-bug-or-suggest".tr(),
         onTap: () => openUrl(
             "https://github.com/jeffersonmk/cashew-desktop-oss/issues"),
         onLongPress: () => copyToClipboard(
             "https://github.com/jeffersonmk/cashew-desktop-oss/issues"),
       ),
       SizedBox(height: 10),
-      sectionTitle("Based on Cashew"),
+      sectionTitle("based-on-cashew".tr()),
       creditCard(
-        role: "Original Author",
+        role: "original-author".tr(),
         name: "James Kokoska",
         subtitle: "github.com/jameskokoska/Cashew",
         onTap: () => openUrl("https://github.com/jameskokoska/Cashew"),

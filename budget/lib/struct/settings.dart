@@ -1,3 +1,4 @@
+import 'package:budget/struct/desktopIntegration.dart';
 import 'dart:convert';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
@@ -300,6 +301,8 @@ void openLanguagePicker(BuildContext context) {
               );
               await Future.delayed(Duration(milliseconds: 50));
               initializeLocalizedMonthNames();
+              // Cashew Desktop: tray menu / notification labels.
+              sendDesktopLabels();
               popRoute(context);
             },
           ),
@@ -318,6 +321,7 @@ Future<void> resetLanguageToSystem(BuildContext context) async {
     pagesNeedingRefresh: [],
     updateGlobalState: false,
   );
+  sendDesktopLabels();
 }
 
 // Backup user settings by creating an entry in the db

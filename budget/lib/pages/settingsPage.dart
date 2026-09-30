@@ -612,8 +612,8 @@ class SettingsPageContent extends StatelessWidget {
         // Cashew Desktop: list of keyboard shortcuts (also Ctrl+/ or F1).
         if (isDesktopPlatform)
           SettingsContainer(
-            title: "Keyboard shortcuts",
-            description: "Ctrl + /  or  F1",
+            title: "keyboard-shortcuts".tr(),
+            description: "keyboard-shortcuts-hint".tr(),
             icon: appStateSettings["outlinedIcons"]
                 ? Icons.keyboard_outlined
                 : Icons.keyboard_rounded,

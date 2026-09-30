@@ -84,7 +84,7 @@ Future<void> showTransactionContextMenu({
               : (outlined
                   ? Icons.check_circle_outline
                   : Icons.check_circle_rounded),
-          selected ? "Deselect" : "select".tr(),
+          selected ? "deselect".tr() : "select".tr(),
         ),
       PopupMenuDivider(),
       item(

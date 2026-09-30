@@ -4,6 +4,7 @@
 // screen; text fields keep their own keys (typing, Ctrl+C/V, etc.) because a
 // focused text field handles a key before these shortcuts do.
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/struct/desktopIntegration.dart';
 import 'package:budget/main.dart';
@@ -58,18 +59,18 @@ Future<void> quitApp() async {
 
 bool _shortcutsHelpOpen = false;
 
-// Label + keys, shown in the Ctrl+/ help popup.
+// Translation key + keys, shown in the Ctrl+/ help popup.
 const List<List<String>> shortcutHelpItems = [
-  ["New transaction", "Ctrl + N"],
-  ["Search transactions", "Ctrl + F"],
-  ["Home", "Ctrl + 1"],
-  ["Transactions", "Ctrl + 2"],
-  ["Budgets", "Ctrl + 3"],
-  ["More", "Ctrl + 4"],
-  ["Backups", "Ctrl + B"],
-  ["Back / close", "Esc"],
-  ["Quit", "Ctrl + Q"],
-  ["Show shortcuts", "Ctrl + /  or  F1"],
+  ["shortcut-new-transaction", "Ctrl + N"],
+  ["shortcut-search-transactions", "Ctrl + F"],
+  ["home", "Ctrl + 1"],
+  ["transactions", "Ctrl + 2"],
+  ["budgets", "Ctrl + 3"],
+  ["more", "Ctrl + 4"],
+  ["backups", "Ctrl + B"],
+  ["shortcut-back-close", "Esc"],
+  ["quit-app", "Ctrl + Q"],
+  ["shortcut-show-shortcuts", "keyboard-shortcuts-hint"],
 ];
 
 Future<void> openKeyboardShortcutsPopup() async {
@@ -82,7 +83,7 @@ Future<void> openKeyboardShortcutsPopup() async {
     icon: appStateSettings["outlinedIcons"]
         ? Icons.keyboard_outlined
         : Icons.keyboard_rounded,
-    title: "Keyboard shortcuts",
+    title: "keyboard-shortcuts".tr(),
     descriptionWidget: Padding(
       padding: const EdgeInsetsDirectional.only(top: 8),
       child: Column(
@@ -93,10 +94,13 @@ Future<void> openKeyboardShortcutsPopup() async {
               padding: const EdgeInsetsDirectional.symmetric(vertical: 4),
               child: Row(
                 children: [
-                  Expanded(child: TextFont(text: item[0], fontSize: 16)),
+                  Expanded(child: TextFont(text: item[0].tr(), fontSize: 16)),
                   SizedBox(width: 20),
                   TextFont(
-                    text: item[1],
+                    // Key names stay as they are; only the hint is translated.
+                    text: item[1].startsWith("Ctrl") || item[1] == "Esc"
+                        ? item[1]
+                        : item[1].tr(),
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -106,7 +110,7 @@ Future<void> openKeyboardShortcutsPopup() async {
         ],
       ),
     ),
-    onSubmitLabel: "OK",
+    onSubmitLabel: "ok".tr(),
     onSubmit: () => navigatorKey.currentState?.pop(),
   );
   _shortcutsHelpOpen = false;

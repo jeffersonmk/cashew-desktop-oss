@@ -93,6 +93,22 @@ Future<void> recordWindowOpened() async {
 // Tray
 // ---------------------------------------------------------------------------
 
+// The tray menu and the notification button are drawn by the native side,
+// so it gets the translated labels from here. Called on startup and when the
+// language changes.
+Future<void> sendDesktopLabels() async {
+  if (!isLinuxDesktop) return;
+  try {
+    await desktopChannel.invokeMethod("setLabels", {
+      "openApp": "tray-open-app".tr(),
+      "quit": "quit-app".tr(),
+      "notificationOpen": "notification-open".tr(),
+    });
+  } catch (e) {
+    print("Tray labels error: " + e.toString());
+  }
+}
+
 Future<bool> applyCloseToTray() async {
   if (!isLinuxDesktop) return false;
   try {

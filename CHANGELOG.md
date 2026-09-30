@@ -31,6 +31,9 @@ How to use:
   - "Start with the system": opens minimized to the tray when you log in.
 - Opening the app again brings the existing window back instead of starting a
   second copy.
+- Portuguese (Brazil and Portugal) translations for everything added in
+  Cashew Desktop: shortcuts, right-click menu, Desktop settings, tray menu,
+  notifications, About and Data Backup pages. Other languages show English.
 
 ### Fixed
 - Shortcuts that leave a page (`Ctrl+1` … `Ctrl+4`, `Ctrl+B`, `Esc`) now ask
