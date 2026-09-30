@@ -1,9 +1,12 @@
 # Builds the Linux AppImage and attaches it to a GitHub Release.
 #
 # How to publish a new version:
-#   git tag v1.0.0
-#   git push origin v1.0.0
-# The workflow runs, creates the release "v1.0.0" and uploads the AppImage.
+#   1. In CHANGELOG.md rename "## [Unreleased]" to "## [1.0.0] - YYYY-MM-DD"
+#      and set `version:` in budget/pubspec.yaml; commit and push.
+#   2. git tag v1.0.0
+#      git push origin v1.0.0
+# The workflow runs, creates the release "v1.0.0" with the notes from
+# CHANGELOG.md and uploads the AppImage.
 #
 # Third-party actions are pinned to exact commits so a hijacked tag can't
 # change what runs here.
@@ -70,10 +73,31 @@ jobs:
           name: Cashew_Desktop-AppImage
           path: budget/build/appimage/*.AppImage
 
+      # Release notes come from the matching "## [X.Y.Z]" section of
+      # CHANGELOG.md. The build fails if that section is missing, so a release
+      # is never published without notes.
+      - name: Extract release notes from CHANGELOG.md
+        if: github.ref_type == 'tag'
+        working-directory: .
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG#v}"
+          awk -v v="$VERSION" '
+            /^## \[/ { if (found) exit; if (index($0, "## [" v "]") == 1) { found=1; next } }
+            found && /^\[[^]]+\]: / { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if ! grep -q '[^[:space:]]' release-notes.md; then
+            echo "::error::CHANGELOG.md has no section for [$VERSION]"
+            exit 1
+          fi
+          cat release-notes.md
+
       - name: Publish GitHub Release
         if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           name: Cashew Desktop ${{ github.ref_name }}
           files: budget/build/appimage/*.AppImage
-          generate_release_notes: true
+          body_path: release-notes.md
