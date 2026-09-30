@@ -28,6 +28,7 @@ import 'package:budget/widgets/transactionEntry/swipeToSelectTransactions.dart';
 import 'package:budget/widgets/transactionEntry/transactionEntryAmount.dart';
 import 'package:budget/widgets/transactionEntry/transactionEntryNote.dart';
 import 'package:budget/widgets/transactionEntry/transactionEntryTag.dart';
+import 'package:budget/widgets/transactionEntry/transactionContextMenu.dart';
 
 ValueNotifier<Map<String, List<String>>> globalSelectedID =
     ValueNotifier<Map<String, List<String>>>({});
@@ -673,62 +674,81 @@ class TransactionEntry extends StatelessWidget {
                                     ? 0.1
                                     : 0.2,
                           ),
-                          child: Tappable(
-                            color: Colors.transparent,
-                            borderRadius:
-                                enableSelectionCheckmark ? 0 : borderRadius,
-                            onLongPress: () {
-                              selectTransaction(transaction, selected, true);
-                            },
-                            onTap: () async {
-                              openContainer();
-                            },
-                            child: AnimatedContainer(
-                              clipBehavior: Clip.none,
-                              duration: const Duration(seconds: 1),
-                              curve: Curves.easeInOutCubicEmphasized,
-                              padding: EdgeInsetsDirectional.only(
-                                start: enableSelectionCheckmark
-                                    ? 0
-                                    : selected
-                                        ? 12 - 2
-                                        : 10 - 2,
-                                end: !enableSelectionCheckmark && selected
-                                    ? 12
-                                    : 10,
-                                top: !enableSelectionCheckmark &&
-                                        selected &&
-                                        isTransactionBeforeSelected == false
-                                    ? 6
-                                    : 4,
-                                bottom: !enableSelectionCheckmark &&
-                                        selected &&
-                                        isTransactionAfterSelected == false
-                                    ? 6
-                                    : 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: selected
-                                    ? selectedColor
-                                    : Colors.transparent,
-                                borderRadius: BorderRadiusDirectional.vertical(
-                                  top: Radius.circular(
-                                    isTransactionBeforeSelected
-                                        ? 0
-                                        : borderRadius,
-                                  ),
-                                  bottom: Radius.circular(
-                                    isTransactionAfterSelected
-                                        ? 0
-                                        : borderRadius,
+                          // Cashew Desktop: right-click opens a menu.
+                          child: GestureDetector(
+                            onSecondaryTapUp: isDesktopPlatform
+                                ? (TapUpDetails details) {
+                                    showTransactionContextMenu(
+                                      context: context,
+                                      globalPosition: details.globalPosition,
+                                      transaction: transaction,
+                                      openTransaction: openContainer,
+                                      selected: selected,
+                                      toggleSelected: allowSelect == false
+                                          ? null
+                                          : () => selectTransaction(
+                                              transaction, selected, false),
+                                    );
+                                  }
+                                : null,
+                            child: Tappable(
+                              color: Colors.transparent,
+                              borderRadius:
+                                  enableSelectionCheckmark ? 0 : borderRadius,
+                              onLongPress: () {
+                                selectTransaction(transaction, selected, true);
+                              },
+                              onTap: () async {
+                                openContainer();
+                              },
+                              child: AnimatedContainer(
+                                clipBehavior: Clip.none,
+                                duration: const Duration(seconds: 1),
+                                curve: Curves.easeInOutCubicEmphasized,
+                                padding: EdgeInsetsDirectional.only(
+                                  start: enableSelectionCheckmark
+                                      ? 0
+                                      : selected
+                                          ? 12 - 2
+                                          : 10 - 2,
+                                  end: !enableSelectionCheckmark && selected
+                                      ? 12
+                                      : 10,
+                                  top: !enableSelectionCheckmark &&
+                                          selected &&
+                                          isTransactionBeforeSelected == false
+                                      ? 6
+                                      : 4,
+                                  bottom: !enableSelectionCheckmark &&
+                                          selected &&
+                                          isTransactionAfterSelected == false
+                                      ? 6
+                                      : 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: selected
+                                      ? selectedColor
+                                      : Colors.transparent,
+                                  borderRadius:
+                                      BorderRadiusDirectional.vertical(
+                                    top: Radius.circular(
+                                      isTransactionBeforeSelected
+                                          ? 0
+                                          : borderRadius,
+                                    ),
+                                    bottom: Radius.circular(
+                                      isTransactionAfterSelected
+                                          ? 0
+                                          : borderRadius,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              child: transactionContents(
-                                openContainer: openContainer,
-                                selected: selected,
-                                areTransactionsBeingSelected:
-                                    areTransactionsBeingSelected,
+                                child: transactionContents(
+                                  openContainer: openContainer,
+                                  selected: selected,
+                                  areTransactionsBeingSelected:
+                                      areTransactionsBeingSelected,
+                                ),
                               ),
                             ),
                           ),

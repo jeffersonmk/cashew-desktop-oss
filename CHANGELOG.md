@@ -20,6 +20,8 @@ How to use:
 - `Ctrl+1` … `Ctrl+4` now switch pages from any screen, not only the main one.
 - The window size is remembered between runs (and the position on X11).
 - "Keyboard shortcuts" item in Settings (Tools & Extras) listing all shortcuts.
+- Right-click menu on transactions: Edit, Duplicate, Duplicate (Today),
+  Select and Delete (asks for confirmation).
 
 ### Fixed
 - Shortcuts that leave a page (`Ctrl+1` … `Ctrl+4`, `Ctrl+B`, `Esc`) now ask

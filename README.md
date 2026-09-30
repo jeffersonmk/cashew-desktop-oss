@@ -139,6 +139,7 @@ Debug builds print the app logs to the terminal.
 - [ ] Windows build
 - [ ] Local attachments
 - [x] Keyboard shortcuts and remembered window size
+- [x] Right-click menu on transactions
 - [ ] Desktop notifications
 
 ## Contact
