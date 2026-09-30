@@ -303,9 +303,16 @@ class NavigationSidebarState extends State<NavigationSidebar> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               SizedBox(height: 40),
-                              GoogleAccountLoginButton(
-                                navigationSidebarButton: true,
-                                isButtonSelected: selectedIndex == 8,
+                              NavigationSidebarButton(
+                                label: "backups".tr(),
+                                icon: appStateSettings["outlinedIcons"]
+                                    ? Icons.folder_outlined
+                                    : Icons.folder_rounded,
+                                isSelected: selectedIndex == 8,
+                                onTap: () {
+                                  pageNavigationFrameworkKey.currentState!
+                                      .changePage(8, switchNavbar: true);
+                                },
                               ),
                               NavigationSidebarButtonWithNavBarIconData(
                                 navBarIconDataKey: "settings",
@@ -315,7 +322,6 @@ class NavigationSidebarState extends State<NavigationSidebar> {
                                 navBarIconDataKey: "about",
                                 currentPageIndex: selectedIndex,
                               ),
-                              SyncButton(),
                               SizedBox(height: 10),
                               SizedBox(
                                   height:

@@ -1339,6 +1339,10 @@ enum PlatformOS {
   web,
 }
 
+// Cashew Desktop OSS: true when running as a native Linux/Windows/macOS app.
+bool get isDesktopPlatform =>
+    !kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS);
+
 PlatformOS? getPlatform({bool ignoreEmulation = false}) {
   if (appStateSettings["iOSEmulate"] == true && ignoreEmulation == false) {
     return PlatformOS.isIOS;

@@ -7,14 +7,25 @@ import 'package:path/path.dart' as p;
 import 'package:drift/drift.dart';
 import 'dart:io';
 
+// Cashew Desktop OSS: on desktop the database lives in the per-app data
+// folder (Linux: ~/.local/share/<app-id>, Windows: %APPDATA%\<app-id>)
+// instead of the user's Documents folder.
+Future<String> getDatabaseDirectoryPath() async {
+  if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
+    final Directory dir = await getApplicationSupportDirectory();
+    if (!await dir.exists()) await dir.create(recursive: true);
+    return dir.path;
+  }
+  return (await getApplicationDocumentsDirectory()).path;
+}
+
 Future<FinanceDatabase> constructDb(String dbName,
     {Uint8List? initialDataWeb}) async {
   // the LazyDatabase util lets us find the right location for the file async.
   final db = LazyDatabase(() async {
     // put the database file, called db.sqlite here, into the documents folder
     // for your app.
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, dbName + '.sqlite'));
+    final file = File(p.join(await getDatabaseDirectoryPath(), dbName + '.sqlite'));
     // return NativeDatabase(file);
     QueryExecutor foregroundExecutor = NativeDatabase(file);
     QueryExecutor backgroundExecutor = NativeDatabase.createInBackground(file);
@@ -27,8 +38,7 @@ Future<DBFileInfo> getCurrentDBFileInfo() async {
   Uint8List dbFileBytes;
   late Stream<List<int>> mediaStream;
 
-  final dbFolder = await getApplicationDocumentsDirectory();
-  final dbFile = File(p.join(dbFolder.path, 'db.sqlite'));
+  final dbFile = File(p.join(await getDatabaseDirectoryPath(), 'db.sqlite'));
   //print("FILE SIZE:" + (dbFile.lengthSync() / 1e+6).toString());
   dbFileBytes = await dbFile.readAsBytes();
   mediaStream = Stream.value(List<int>.from(dbFileBytes));
@@ -37,8 +47,7 @@ Future<DBFileInfo> getCurrentDBFileInfo() async {
 }
 
 Future overwriteDefaultDB(Uint8List dataStore) async {
-  final dbFolder = await getApplicationDocumentsDirectory();
-  final dbFile = File(p.join(dbFolder.path, 'db.sqlite'));
+  final dbFile = File(p.join(await getDatabaseDirectoryPath(), 'db.sqlite'));
   await dbFile.writeAsBytes(dataStore);
   // we need to be able to sync with others after the restore
   await sharedPreferences.setString("dateOfLastSyncedWithClient", "{}");

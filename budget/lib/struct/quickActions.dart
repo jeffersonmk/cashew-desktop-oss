@@ -19,7 +19,8 @@ Throttler quickActionThrottler =
     Throttler(duration: Duration(milliseconds: 350));
 
 void runQuickActionsPayLoads(context) async {
-  if (kIsWeb) return;
+  // Desktop OSS: quick actions (launcher shortcuts) only exist on mobile.
+  if (kIsWeb || isDesktopPlatform) return;
   final QuickActions quickActions = const QuickActions();
   quickActions.initialize((String quickAction) async {
     if (!quickActionThrottler.canProceed()) return;

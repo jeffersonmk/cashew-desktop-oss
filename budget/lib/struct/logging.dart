@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'package:budget/functions.dart';
 import 'package:budget/struct/settings.dart';
@@ -50,10 +51,16 @@ captureLogs(Function body) {
     () async {
       await body();
     },
-    (error, stackTrace) {},
+    (error, stackTrace) {
+      // Desktop OSS: surface uncaught errors in the terminal while developing.
+      if (kDebugMode) {
+        debugPrintStack(stackTrace: stackTrace, label: error.toString());
+      }
+    },
     zoneSpecification: ZoneSpecification(
       print: (Zone self, ZoneDelegate parent, Zone zone, String message) {
         logService.log(message);
+        if (kDebugMode) parent.print(zone, message);
       },
     ),
   );

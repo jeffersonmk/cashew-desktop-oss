@@ -11,7 +11,6 @@ import 'package:budget/pages/addCategoryPage.dart';
 import 'package:budget/pages/addObjectivePage.dart';
 import 'package:budget/pages/addTransactionPage.dart';
 import 'package:budget/pages/addWalletPage.dart';
-import 'package:budget/pages/autoTransactionsPageEmail.dart';
 import 'package:budget/pages/budgetsListPage.dart';
 import 'package:budget/pages/editAssociatedTitlesPage.dart';
 import 'package:budget/pages/editBudgetPage.dart';
@@ -34,8 +33,6 @@ import 'package:budget/struct/defaultPreferences.dart';
 import 'package:budget/struct/navBarIconsData.dart';
 import 'package:budget/struct/quickActions.dart';
 import 'package:budget/struct/settings.dart';
-import 'package:budget/struct/shareBudget.dart';
-import 'package:budget/struct/syncClient.dart';
 import 'package:budget/widgets/accountAndBackup.dart';
 import 'package:budget/widgets/bottomNavBar.dart';
 import 'package:budget/widgets/button.dart';
@@ -71,7 +68,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lazy_indexed_stack/flutter_lazy_indexed_stack.dart';
-import 'package:googleapis/drive/v3.dart';
 import 'package:provider/provider.dart';
 // import 'package:feature_discovery/feature_discovery.dart';
 
@@ -290,8 +286,6 @@ GlobalKey<UpcomingOverdueTransactionsState>
 GlobalKey<CreditDebtTransactionsState> creditDebtTransactionsKey = GlobalKey();
 GlobalKey<ProductsState> purchasesStateKey = GlobalKey();
 GlobalKey<AccountsPageState> accountsPageStateKey = GlobalKey();
-GlobalKey<GoogleAccountLoginButtonState> settingsGoogleAccountLoginButtonKey =
-    GlobalKey();
 GlobalKey<NavigationSidebarState> sidebarStateKey = GlobalKey();
 GlobalKey<GlobalLoadingProgressState> loadingProgressKey = GlobalKey();
 GlobalKey<GlobalLoadingIndeterminateState> loadingIndeterminateKey =
@@ -301,54 +295,19 @@ GlobalKey<RenderHomePageWidgetsState> renderHomePageWidgetsKey = GlobalKey();
 
 late bool entireAppLoaded;
 bool runningCloudFunctions = false;
-bool errorSigningInDuringCloud = false;
+// Desktop OSS: there is no cloud anymore. This only runs local maintenance
+// tasks (automatic local backup + exchange rates). The name is kept so the
+// rest of the code base does not need to change.
 Future<bool> runAllCloudFunctions(BuildContext context,
     {bool forceSignIn = false}) async {
-  print("Running All Cloud Functions");
   runningCloudFunctions = true;
-  errorSigningInDuringCloud = false;
   try {
-    loadingIndeterminateKey.currentState?.setVisibility(true);
-    await runForceSignIn(context);
-    await syncData(context);
-    if (appStateSettings["emailScanningPullToRefresh"] ||
-        entireAppLoaded == false) {
-      loadingIndeterminateKey.currentState?.setVisibility(true);
-      await parseEmailsInBackground(context, forceParse: true);
-    }
-    loadingIndeterminateKey.currentState?.setVisibility(true);
-    await syncPendingQueueOnServer(); //sync before download
-    loadingIndeterminateKey.currentState?.setVisibility(true);
-    await getCloudBudgets();
-    loadingIndeterminateKey.currentState?.setVisibility(true);
     await createBackupInBackground(context);
-    loadingIndeterminateKey.currentState?.setVisibility(true);
     await getExchangeRates();
   } catch (e) {
-    print("Error running sync functions on load: " + e.toString());
-    loadingIndeterminateKey.currentState?.setVisibility(false);
-    runningCloudFunctions = false;
-    canSyncData = true;
-    if (e is DetailedApiRequestError &&
-            e.status == 401 &&
-            forceSignIn == true ||
-        e is PlatformException) {
-      // Request had invalid authentication credentials. Try logging out and back in.
-      // This stems from silent sign-in not providing the credentials for GDrive API for e.g.
-      await refreshGoogleSignIn();
-      runAllCloudFunctions(context);
-    } else {
-      if (kIsWeb && appStateSettings["webForceLoginPopupOnLaunch"] == true) {
-        signOutGoogle();
-      }
-    }
-    return false;
+    print("Error running startup tasks: " + e.toString());
   }
-  loadingIndeterminateKey.currentState?.setVisibility(false);
-  Future.delayed(Duration(milliseconds: 2000), () {
-    runningCloudFunctions = false;
-  });
-  errorSigningInDuringCloud = false;
+  runningCloudFunctions = false;
   return true;
 }
 
@@ -436,10 +395,6 @@ class PageNavigationFrameworkState extends State<PageNavigationFramework> {
         await runAllCloudFunctions(context);
       }
 
-      // Do this after cloud functions attempt (i.e. if user is not signed in we can show it)
-      if (isRatingPopupShown == false && isChangelogShown == false) {
-        openBackupReminderPopupCheck(context);
-      }
 
       // Mark subscriptions as paid AFTER syncing with cloud
       // Maybe another device already marked them as paid
@@ -458,15 +413,6 @@ class PageNavigationFrameworkState extends State<PageNavigationFramework> {
 
       print("Entire app loaded");
 
-      database.watchAllForAutoSync().listen((event) {
-        // Must be logged in to perform an automatic sync - googleUser != null
-        // If we remove this, it will ask the user to login though - but it can be annoying
-        // Users can visually see the last time of sync, especially on web where sign-in is not automatic,
-        // so it shouldn't be an issue
-        if (runningCloudFunctions == false && googleUser != null) {
-          createSyncBackup(changeMadeSync: true);
-        }
-      });
 
       if (kIsWeb) {
         // On web, disable the browser's context menu since this example uses a custom

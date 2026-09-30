@@ -12,11 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:timer_builder/timer_builder.dart';
 
 bool enableSwipeDownToRefresh(BuildContext context) {
-  return selectingTransactionsActive == 0 &&
-      runningCloudFunctions == false &&
-      appStateSettings["hasSignedIn"] != false &&
-      appStateSettings["backupSync"] == true &&
-      googleUser != null;
+  // Desktop OSS: no cloud sync, so pull-to-refresh sync is disabled.
+  return false;
   // && getIsFullScreen(context) == false;
 }
 

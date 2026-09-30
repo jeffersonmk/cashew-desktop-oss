@@ -1,3 +1,4 @@
+import 'package:budget/pages/accountsPage.dart';
 import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart' hide AppSettings;
 import 'package:budget/pages/aboutPage.dart';
@@ -243,9 +244,15 @@ class MorePages extends StatelessWidget {
                       : SizedBox.shrink(),
               if (hasSideNavigation == false)
                 Expanded(
-                    child: GoogleAccountLoginButton(
-                  key: settingsGoogleAccountLoginButtonKey,
-                )),
+                  child: SettingsContainerOpenPage(
+                    openPage: AccountsPage(),
+                    title: "backups".tr(),
+                    icon: appStateSettings["outlinedIcons"]
+                        ? Icons.folder_outlined
+                        : Icons.folder_rounded,
+                    isOutlined: true,
+                  ),
+                ),
             ],
           ),
           if (hasSideNavigation == false)
@@ -569,16 +576,6 @@ class SettingsPageContent extends StatelessWidget {
         //   icon: appStateSettings["outlinedIcons"] ? Icons.auto_fix_high_outlined : Icons.auto_fix_high_rounded,
         // ),
 
-        appStateSettings["emailScanning"]
-            ? SettingsContainerOpenPage(
-                openPage: AutoTransactionsPageEmail(),
-                title: "auto-email-transactions".tr(),
-                icon: appStateSettings["outlinedIcons"]
-                    ? Icons.mark_email_unread_outlined
-                    : Icons.mark_email_unread_rounded,
-              )
-            : SizedBox.shrink(),
-
         appStateSettings["notificationScanningDebug"] &&
                 getPlatform(ignoreEmulation: true) == PlatformOS.isAndroid
             ? SettingsContainerOpenPage(
@@ -618,9 +615,12 @@ class SettingsPageContent extends StatelessWidget {
 
         ImportDB(),
 
-        GoogleAccountLoginButton(
-          isOutlinedButton: false,
-          forceButtonName: "google-drive".tr(),
+        SettingsContainerOpenPage(
+          openPage: AccountsPage(),
+          title: "data-backup".tr(),
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.folder_outlined
+              : Icons.folder_rounded,
         ),
       ],
     );

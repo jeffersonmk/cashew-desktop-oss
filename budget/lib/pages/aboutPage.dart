@@ -760,54 +760,6 @@ void deleteAllDataFlow(BuildContext context) {
     icon: appStateSettings["outlinedIcons"]
         ? Icons.warning_outlined
         : Icons.warning_rounded,
-    onExtraLabel2: "erase-synced-data-and-cloud-backups".tr(),
-    onExtra2: () {
-      popRoute(context);
-      openBottomSheet(
-        context,
-        PopupFramework(
-          title: "erase-cloud-data".tr(),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  bottom: 18,
-                  start: 5,
-                  end: 5,
-                ),
-                child: TextFont(
-                  text: "erase-cloud-data-description".tr(),
-                  fontSize: 16.5,
-                  textAlign: TextAlign.center,
-                  maxLines: 10,
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: SyncCloudBackupButton(
-                      onTap: () async {
-                        popRoute(context);
-                        pushRoute(context, AccountsPage());
-                      },
-                    ),
-                  ),
-                  SizedBox(width: 18),
-                  Expanded(
-                    child: BackupsCloudBackupButton(
-                      onTap: () async {
-                        popRoute(context);
-                        pushRoute(context, AccountsPage());
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-    },
     onSubmit: () async {
       popRoute(context);
       openPopup(

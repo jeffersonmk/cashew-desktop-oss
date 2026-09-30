@@ -25,7 +25,9 @@ import 'package:budget/widgets/timeDigits.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-bool notificationsGlobalEnabled = kIsWeb == false;
+// Desktop OSS: scheduled notifications are not supported by
+// flutter_local_notifications on Linux/Windows yet, so they are disabled there.
+bool notificationsGlobalEnabled = kIsWeb == false && !isDesktopPlatform;
 
 enum ReminderNotificationType {
   IfAppNotOpened,
@@ -384,6 +386,7 @@ Future<bool> scheduleDailyNotification(
 }
 
 Future<bool> cancelDailyNotification() async {
+  if (!notificationsGlobalEnabled) return true;
   // Need to cancel all, including the one at 0 - even if it does not exist
   for (int i = 0; i <= 14; i++) {
     await flutterLocalNotificationsPlugin.cancel(i);
@@ -470,6 +473,7 @@ Future<bool> scheduleUpcomingTransactionsNotification(context) async {
 }
 
 Future<bool> cancelUpcomingTransactionsNotification() async {
+  if (!notificationsGlobalEnabled) return true;
   List<Transaction> upcomingTransactions =
       await database.getAllUpcomingTransactions(
     startDate: DateTime.now().justDay(dayOffset: -1),
@@ -500,7 +504,7 @@ tz.TZDateTime _nextInstanceOfSetTime(TimeOfDay timeOfDay, {int dayOffset = 0}) {
 }
 
 Future<bool> initializeNotificationsPlatform() async {
-  if (kIsWeb || Platform.isLinux) {
+  if (!notificationsGlobalEnabled) {
     return false;
   }
   bool result = await checkNotificationsPermissionAll();

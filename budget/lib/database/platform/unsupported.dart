@@ -9,3 +9,5 @@ Future<FinanceDatabase> constructDb(String dbName,
 Future<DBFileInfo> getCurrentDBFileInfo() => throw UnimplementedError();
 
 Future overwriteDefaultDB(Uint8List dataStore) => throw UnimplementedError();
+
+Future<String> getDatabaseDirectoryPath() => throw UnimplementedError();
