@@ -125,6 +125,14 @@ Debug builds print the app logs to the terminal.
 - [ ] Local attachments
 - [ ] Desktop notifications
 
+## Contact
+
+- **Bugs and suggestions:** open an
+  [issue](https://github.com/jeffersonmk/cashew-desktop-oss/issues).
+- **Security problems or private matters:** see [SECURITY.md](SECURITY.md).
+
+Please don't contact the original Cashew author about this fork.
+
 ## License
 
 [GPL-3.0](LICENSE), the same as the original Cashew.

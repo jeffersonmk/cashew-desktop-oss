@@ -164,12 +164,17 @@ class AboutPageState extends State<AboutPage> {
     // original Cashew authors (required by GPL-3.0 and kept on purpose).
     List<Widget> developmentTeam = [
       sectionTitle("Cashew Desktop"),
+      // Contact goes through GitHub Issues (public, searchable, no email
+      // address baked into every release). Private/security reports: see
+      // SECURITY.md in the repository.
       creditCard(
         role: "Maintainer",
         name: "jeffersonmk",
-        subtitle: "jeffersonmk@proton.me",
-        onTap: () => openUrl("mailto:jeffersonmk@proton.me"),
-        onLongPress: () => copyToClipboard("jeffersonmk@proton.me"),
+        subtitle: "Report a bug or suggest a feature",
+        onTap: () => openUrl(
+            "https://github.com/jeffersonmk/cashew-desktop-oss/issues"),
+        onLongPress: () => copyToClipboard(
+            "https://github.com/jeffersonmk/cashew-desktop-oss/issues"),
       ),
       SizedBox(height: 10),
       sectionTitle("Based on Cashew"),
