@@ -1208,5 +1208,13 @@
   "based-on-cashew": "Baseado no Cashew",
   "original-author": "Autor original",
   "backup-folder": "Pasta das cópias de segurança",
-  "no-backups-yet": "Ainda não há cópias de segurança."
+  "no-backups-yet": "Ainda não há cópias de segurança.",
+  "check-for-updates": "Verificar atualizações",
+  "check-for-updates-description": "Uma vez por dia, pergunta ao GitHub se saiu uma versão nova",
+  "check-for-updates-now": "Verificar agora",
+  "update-available": "Nova versão disponível",
+  "update-available-description": "A versão {version} foi lançada (tem a {current}). Toque para abrir a página de transferência.",
+  "up-to-date": "Tem a versão mais recente",
+  "update-check-failed": "Não foi possível verificar atualizações",
+  "update-check-failed-description": "Verifique a sua ligação à internet e tente novamente"
 }

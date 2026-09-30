@@ -14,6 +14,8 @@ How to use:
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-09-30
+
 ### Added
 - Keyboard shortcuts: `Ctrl+N` new transaction, `Ctrl+F` search,
   `Ctrl+B` backups, `Ctrl+Q` quit, `Ctrl+/` or `F1` shows the list.
@@ -31,6 +33,9 @@ How to use:
   - "Start with the system": opens minimized to the tray when you log in.
 - Opening the app again brings the existing window back instead of starting a
   second copy.
+- Update check: once a day the app asks GitHub for the latest release and
+  shows a notice with a link to the download page when a newer version is
+  out. Can be turned off in Settings → Desktop, which also has "Check Now".
 - Portuguese (Brazil and Portugal) translations for everything added in
   Cashew Desktop: shortcuts, right-click menu, Desktop settings, tray menu,
   notifications, About and Data Backup pages. Other languages show English.
@@ -83,7 +88,8 @@ First release of Cashew Desktop, a fork of
 ### Fixed
 - Startup on Linux (notifications and time zone detection).
 
-[Unreleased]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jeffersonmk/cashew-desktop-oss/releases/tag/v1.0.0

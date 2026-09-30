@@ -1208,5 +1208,13 @@
   "based-on-cashew": "Based on Cashew",
   "original-author": "Original Author",
   "backup-folder": "Backup Folder",
-  "no-backups-yet": "No backups yet."
+  "no-backups-yet": "No backups yet.",
+  "check-for-updates": "Check for Updates",
+  "check-for-updates-description": "Once a day, asks GitHub if a new version was released",
+  "check-for-updates-now": "Check Now",
+  "update-available": "New version available",
+  "update-available-description": "Version {version} is out (you have {current}). Tap to open the download page.",
+  "up-to-date": "You have the latest version",
+  "update-check-failed": "Could not check for updates",
+  "update-check-failed-description": "Check your internet connection and try again"
 }

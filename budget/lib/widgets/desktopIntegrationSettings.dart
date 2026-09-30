@@ -2,6 +2,7 @@
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:budget/struct/desktopIntegration.dart';
+import 'package:budget/struct/updateCheck.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/globalSnackbar.dart';
 import 'package:budget/widgets/openSnackbar.dart';
@@ -86,6 +87,25 @@ class _DesktopIntegrationSettingsState
             });
             return true;
           },
+        ),
+        SettingsContainerSwitch(
+          title: "check-for-updates".tr(),
+          description: "check-for-updates-description".tr(),
+          initialValue: appStateSettings["desktopCheckForUpdates"] == true,
+          icon: outlined
+              ? Icons.system_update_outlined
+              : Icons.system_update_rounded,
+          onSwitched: (value) async {
+            await updateSettings("desktopCheckForUpdates", value,
+                updateGlobalState: false);
+            return true;
+          },
+        ),
+        SettingsContainer(
+          title: "check-for-updates-now".tr(),
+          description: "v" + currentAppVersion,
+          icon: outlined ? Icons.refresh_outlined : Icons.refresh_rounded,
+          onTap: () => checkForUpdatesNow(),
         ),
       ],
     );

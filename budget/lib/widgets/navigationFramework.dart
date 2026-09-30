@@ -1,3 +1,4 @@
+import 'package:budget/struct/updateCheck.dart';
 import 'package:budget/struct/desktopIntegration.dart';
 import 'package:animations/animations.dart';
 import 'package:budget/colors.dart';
@@ -416,6 +417,9 @@ class PageNavigationFrameworkState extends State<PageNavigationFramework> {
       entireAppLoaded = true;
 
       print("Entire app loaded");
+
+      // Cashew Desktop: look for a newer release (once a day, in background).
+      checkForUpdatesAutomatically();
 
 
       if (kIsWeb) {

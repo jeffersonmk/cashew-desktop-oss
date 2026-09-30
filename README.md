@@ -69,10 +69,14 @@ The window size is remembered between runs
 
 - Your financial data is stored **only on your computer** (see the paths
   above). There is no account, no cloud sync and no analytics.
-- The only network request the app makes on its own is downloading public
-  currency exchange rates from
-  [jsDelivr](https://github.com/fawazahmed0/exchange-api). No personal data
-  is sent.
+- The app makes only two network requests on its own, and neither sends
+  personal data:
+  - downloading public currency exchange rates from
+    [jsDelivr](https://github.com/fawazahmed0/exchange-api);
+  - once a day, asking the GitHub API for the latest release of this
+    repository (update check). It can be turned off in
+    Settings → Desktop → Check for Updates. Nothing is downloaded or installed
+    automatically.
 - Links (GitHub, help pages) only open in your browser when you click them.
 
 ## Download (AppImage)
@@ -141,6 +145,7 @@ Debug builds print the app logs to the terminal.
 - [x] Keyboard shortcuts and remembered window size
 - [x] Right-click menu on transactions
 - [x] Desktop notifications, tray icon and start with the system
+- [x] Update check (notice when a new release is out)
 
 ## Contact
 
