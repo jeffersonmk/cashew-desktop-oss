@@ -94,95 +94,94 @@ class AboutPageState extends State<AboutPage> {
       ],
     );
 
-    List<Widget> developmentTeam = [
-      Padding(
+    Widget creditCard({
+      required String role,
+      required String name,
+      String? subtitle,
+      VoidCallback? onTap,
+      VoidCallback? onLongPress,
+    }) {
+      return Padding(
+        padding:
+            const EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 5),
+        child: Tappable(
+          onTap: onTap ?? () {},
+          onLongPress: onLongPress,
+          color: containerColor,
+          borderRadius: getPlatform() == PlatformOS.isIOS ? 10 : 15,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: 13, vertical: 15),
+            child: Column(
+              children: [
+                TextFont(
+                  text: role,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  textAlign: TextAlign.center,
+                  maxLines: 5,
+                ),
+                TextFont(
+                  text: name,
+                  fontSize: 29,
+                  fontWeight: FontWeight.bold,
+                  textColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                  textAlign: TextAlign.center,
+                  maxLines: 5,
+                ),
+                if (subtitle != null)
+                  TextFont(
+                    text: subtitle,
+                    fontSize: 16,
+                    textAlign: TextAlign.center,
+                    maxLines: 5,
+                    textColor: getColor(context, "textLight"),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    Widget sectionTitle(String text) {
+      return Padding(
         padding:
             const EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 7),
         child: Center(
           child: TextFont(
-            text: "development-team".tr(),
+            text: text,
             fontSize: 20,
             fontWeight: FontWeight.bold,
             textAlign: TextAlign.center,
             maxLines: 5,
           ),
         ),
+      );
+    }
+
+    // Cashew Desktop: the fork's maintainer first, then credit to the
+    // original Cashew authors (required by GPL-3.0 and kept on purpose).
+    List<Widget> developmentTeam = [
+      sectionTitle("Cashew Desktop"),
+      creditCard(
+        role: "Maintainer",
+        name: "jeffersonmk",
+        subtitle: "jeffersonmk@proton.me",
+        onTap: () => openUrl("mailto:jeffersonmk@proton.me"),
+        onLongPress: () => copyToClipboard("jeffersonmk@proton.me"),
       ),
-      Padding(
-        padding:
-            const EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 5),
-        child: Tappable(
-          onTap: () {
-            openUrl('mailto:dapperappdeveloper@gmail.com');
-          },
-          onLongPress: () {
-            copyToClipboard("dapperappdeveloper@gmail.com");
-          },
-          color: containerColor,
-          borderRadius: getPlatform() == PlatformOS.isIOS ? 10 : 15,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: 13, vertical: 15),
-            child: Column(
-              children: [
-                TextFont(
-                  text: "lead-developer".tr(),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  textAlign: TextAlign.center,
-                  maxLines: 5,
-                ),
-                TextFont(
-                  text: "James",
-                  fontSize: 29,
-                  fontWeight: FontWeight.bold,
-                  textColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                  textAlign: TextAlign.center,
-                  maxLines: 5,
-                ),
-                TextFont(
-                  text: "dapperappdeveloper@gmail.com",
-                  fontSize: 16,
-                  textAlign: TextAlign.center,
-                  maxLines: 5,
-                  textColor: getColor(context, "textLight"),
-                ),
-              ],
-            ),
-          ),
-        ),
+      SizedBox(height: 10),
+      sectionTitle("Based on Cashew"),
+      creditCard(
+        role: "Original Author",
+        name: "James Kokoska",
+        subtitle: "github.com/jameskokoska/Cashew",
+        onTap: () => openUrl("https://github.com/jameskokoska/Cashew"),
       ),
-      Padding(
-        padding:
-            const EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 5),
-        child: Tappable(
-          onTap: () {},
-          color: containerColor,
-          borderRadius: getPlatform() == PlatformOS.isIOS ? 10 : 15,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: 13, vertical: 15),
-            child: Column(
-              children: [
-                TextFont(
-                  text: "database-designer".tr(),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  textAlign: TextAlign.center,
-                  maxLines: 5,
-                ),
-                TextFont(
-                  text: "YuYing",
-                  fontSize: 29,
-                  fontWeight: FontWeight.bold,
-                  textColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                  textAlign: TextAlign.center,
-                  maxLines: 5,
-                ),
-              ],
-            ),
-          ),
-        ),
+      creditCard(
+        role: "database-designer".tr(),
+        name: "YuYing",
       ),
       SizedBox(height: 10),
       Padding(
@@ -190,7 +189,7 @@ class AboutPageState extends State<AboutPage> {
             const EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 7),
         child: Center(
           child: TextFont(
-            text: "made-in-canada".tr() + " " + "🍁",
+            text: "Cashew: " + "made-in-canada".tr() + " 🍁",
             fontSize: 14,
             textAlign: TextAlign.center,
             maxLines: 5,
@@ -218,13 +217,6 @@ class AboutPageState extends State<AboutPage> {
       AboutInfoBox(
         title: "Flutter",
         link: "https://flutter.dev/",
-        padding: fullScreenLayout
-            ? EdgeInsetsDirectional.symmetric(horizontal: 7.5, vertical: 5)
-            : null,
-      ),
-      AboutInfoBox(
-        title: "Google Cloud APIs",
-        link: "https://cloud.google.com/",
         padding: fullScreenLayout
             ? EdgeInsetsDirectional.symmetric(horizontal: 7.5, vertical: 5)
             : null,
@@ -815,7 +807,7 @@ class AboutLinks extends StatelessWidget {
             _buildTappable(
               context: context,
               isExternalLink: true,
-              onTap: () => openUrl("https://cashewapp.web.app/faq.html"),
+              onTap: () => openUrl("https://github.com/jeffersonmk/cashew-desktop-oss#readme"),
               icon: appStateSettings["outlinedIcons"]
                   ? Icons.live_help_outlined
                   : Icons.live_help_rounded,
