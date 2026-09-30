@@ -70,6 +70,13 @@ add_executable(${BINARY_NAME}
 # that need different build settings.
 apply_standard_settings(${BINARY_NAME})
 
+# Cashew Desktop: the release AppImage is built on Ubuntu 22.04 (GLib 2.72).
+# With -Werror, using a newer GLib API fails the build here too, not only on
+# GitHub.
+target_compile_definitions(${BINARY_NAME} PRIVATE
+  GLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_72
+  GLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_72)
+
 # Add dependency libraries. Add any application-specific dependencies here.
 target_link_libraries(${BINARY_NAME} PRIVATE flutter)
 target_link_libraries(${BINARY_NAME} PRIVATE PkgConfig::GTK)
