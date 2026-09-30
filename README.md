@@ -140,7 +140,7 @@ Debug builds print the app logs to the terminal.
 - [ ] Local attachments
 - [x] Keyboard shortcuts and remembered window size
 - [x] Right-click menu on transactions
-- [ ] Desktop notifications
+- [x] Desktop notifications, tray icon and start with the system
 
 ## Contact
 

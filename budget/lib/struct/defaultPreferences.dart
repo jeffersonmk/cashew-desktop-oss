@@ -149,6 +149,12 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "notificationHour": 20,
     "notificationMinute": 0,
     "notificationsUpcomingTransactions": true,
+    // Cashew Desktop (Linux): tray, notifications bookkeeping.
+    "desktopCloseToTray": false,
+    "desktopStartWithSystem": false,
+    "desktopLastDailyReminder": "",
+    "desktopLastWindowOpenedDay": "",
+    "desktopNotifiedUpcoming": {},
     "notificationsReminderType": ReminderNotificationType.IfAppNotOpened.index,
     "appOpenedHour": DateTime.now().hour,
     "appOpenedMinute": DateTime.now().minute,

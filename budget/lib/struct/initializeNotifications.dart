@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 Future<String?> initializeNotifications() async {
-  if (!notificationsGlobalEnabled) return null;
+  if (!useMobileNotificationPlugin) return null;
   // Since iOS cannot send scheduled notifications when the app is open
   // There is no need to listen to incoming notification payloads
   if (getPlatform(ignoreEmulation: true) != PlatformOS.isIOS) {
@@ -107,7 +107,7 @@ Future<bool> runNotificationPayLoads(context) async {
 }
 
 Future<void> setDailyNotifications(context) async {
-  if (!notificationsGlobalEnabled) return;
+  if (!useMobileNotificationPlugin) return;
   bool notificationsEnabled = appStateSettings["notifications"] == true;
 
   if (notificationsEnabled) {
@@ -131,7 +131,7 @@ Future<void> setDailyNotifications(context) async {
 }
 
 Future<void> setUpcomingNotifications(context) async {
-  if (!notificationsGlobalEnabled) return;
+  if (!useMobileNotificationPlugin) return;
   bool upcomingTransactionsNotificationsEnabled =
       appStateSettings["notificationsUpcomingTransactions"] == true;
   if (upcomingTransactionsNotificationsEnabled) {

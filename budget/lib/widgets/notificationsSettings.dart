@@ -7,6 +7,7 @@ import 'package:budget/functions.dart';
 import 'package:budget/pages/addTransactionPage.dart';
 import 'package:budget/struct/databaseGlobal.dart';
 import 'package:budget/struct/initializeNotifications.dart';
+import 'package:budget/struct/desktopIntegration.dart';
 import 'package:budget/struct/notificationsGlobal.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/animatedExpanded.dart';
@@ -27,7 +28,11 @@ import 'package:timezone/timezone.dart' as tz;
 
 // Desktop OSS: scheduled notifications are not supported by
 // flutter_local_notifications on Linux/Windows yet, so they are disabled there.
-bool notificationsGlobalEnabled = kIsWeb == false && !isDesktopPlatform;
+// Cashew Desktop: on Linux the reminders are shown by the in-app scheduler in
+// struct/desktopIntegration.dart (the mobile notification plugin is not used).
+bool notificationsGlobalEnabled =
+    kIsWeb == false && (!isDesktopPlatform || isLinuxDesktop);
+bool get useMobileNotificationPlugin => kIsWeb == false && !isDesktopPlatform;
 
 enum ReminderNotificationType {
   IfAppNotOpened,
@@ -321,6 +326,8 @@ List<String> _reminderStrings = [
 Future<bool> scheduleDailyNotification(
     BuildContext context, TimeOfDay timeOfDay,
     {bool scheduleNowDebug = false}) async {
+  // Linux: reminders are shown by DesktopNotificationScheduler.
+  if (!useMobileNotificationPlugin) return true;
   // If the app was opened on the day the notification was scheduled it will be
   // cancelled and set to the next day because of _nextInstanceOfSetTime
   // If ReminderNotificationType.Everyday is not true
@@ -386,7 +393,7 @@ Future<bool> scheduleDailyNotification(
 }
 
 Future<bool> cancelDailyNotification() async {
-  if (!notificationsGlobalEnabled) return true;
+  if (!useMobileNotificationPlugin) return true;
   // Need to cancel all, including the one at 0 - even if it does not exist
   for (int i = 0; i <= 14; i++) {
     await flutterLocalNotificationsPlugin.cancel(i);
@@ -396,6 +403,7 @@ Future<bool> cancelDailyNotification() async {
 }
 
 Future<bool> scheduleUpcomingTransactionsNotification(context) async {
+  if (!useMobileNotificationPlugin) return true;
   await cancelUpcomingTransactionsNotification();
 
   AndroidNotificationDetails androidNotificationDetails =
@@ -473,7 +481,7 @@ Future<bool> scheduleUpcomingTransactionsNotification(context) async {
 }
 
 Future<bool> cancelUpcomingTransactionsNotification() async {
-  if (!notificationsGlobalEnabled) return true;
+  if (!useMobileNotificationPlugin) return true;
   List<Transaction> upcomingTransactions =
       await database.getAllUpcomingTransactions(
     startDate: DateTime.now().justDay(dayOffset: -1),
@@ -504,7 +512,8 @@ tz.TZDateTime _nextInstanceOfSetTime(TimeOfDay timeOfDay, {int dayOffset = 0}) {
 }
 
 Future<bool> initializeNotificationsPlatform() async {
-  if (!notificationsGlobalEnabled) {
+  if (isLinuxDesktop) return desktopCapabilities.notifications;
+  if (!useMobileNotificationPlugin) {
     return false;
   }
   bool result = await checkNotificationsPermissionAll();
@@ -539,6 +548,7 @@ Future<bool> checkNotificationsPermissionAndroid() async {
 }
 
 Future<bool> checkNotificationsPermissionAll() async {
+  if (isLinuxDesktop) return desktopCapabilities.notifications;
   try {
     if (Platform.isAndroid) return await checkNotificationsPermissionAndroid();
     if (Platform.isIOS) return await checkNotificationsPermissionIOS();

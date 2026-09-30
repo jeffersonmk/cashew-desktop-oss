@@ -1,4 +1,6 @@
 import 'package:budget/struct/keyboardIntents.dart';
+import 'package:budget/widgets/desktopIntegrationSettings.dart';
+import 'package:budget/struct/desktopIntegration.dart';
 import 'package:budget/pages/accountsPage.dart';
 import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart' hide AppSettings;
@@ -570,6 +572,8 @@ class SettingsPageContent extends StatelessWidget {
               ? Icons.app_registration_outlined
               : Icons.app_registration_rounded,
         ),
+
+        if (isLinuxDesktop) DesktopIntegrationSettings(),
 
         SettingsHeader(title: "tools-and-extras".tr()),
         // SettingsContainerOpenPage(

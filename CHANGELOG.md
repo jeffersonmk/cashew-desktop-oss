@@ -22,6 +22,15 @@ How to use:
 - "Keyboard shortcuts" item in Settings (Tools & Extras) listing all shortcuts.
 - Right-click menu on transactions: Edit, Duplicate, Duplicate (Today),
   Select and Delete (asks for confirmation).
+- Desktop notifications on Linux: daily reminder and upcoming bills /
+  subscriptions. Clicking a notification opens the app. Reminders are shown
+  while the app is running (window open or in the tray).
+- Settings → Desktop:
+  - "Keep running in the tray": closing the window keeps the app in the tray
+    (right-click the icon for Open / Quit).
+  - "Start with the system": opens minimized to the tray when you log in.
+- Opening the app again brings the existing window back instead of starting a
+  second copy.
 
 ### Fixed
 - Shortcuts that leave a page (`Ctrl+1` … `Ctrl+4`, `Ctrl+B`, `Esc`) now ask

@@ -5,6 +5,7 @@
 // focused text field handles a key before these shortcuts do.
 
 import 'package:budget/functions.dart';
+import 'package:budget/struct/desktopIntegration.dart';
 import 'package:budget/main.dart';
 import 'package:budget/pages/addTransactionPage.dart';
 import 'package:budget/pages/transactionsSearchPage.dart';
@@ -43,14 +44,13 @@ Future<void> _goToPage(int page) async {
   pageNavigationFrameworkKey.currentState?.changePage(page, switchNavbar: true);
 }
 
-const MethodChannel _windowChannel = MethodChannel("cashew/window");
 
 // Close the app like the window's close button does (the native side saves
 // the window size first). SystemNavigator.pop would destroy the window and
 // crash the Linux engine, so it is only a fallback for other platforms.
 Future<void> quitApp() async {
   try {
-    await _windowChannel.invokeMethod("quit");
+    await desktopChannel.invokeMethod("quit");
   } on MissingPluginException {
     await SystemNavigator.pop();
   }

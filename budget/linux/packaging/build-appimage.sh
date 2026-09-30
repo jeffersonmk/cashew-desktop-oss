@@ -47,6 +47,21 @@ mkdir -p "$APPDIR/usr/share/applications" "$APPDIR/usr/share/metainfo"
 mkdir -p "$APPDIR/usr/bin"
 cp -r "$BUNDLE/." "$APPDIR/usr/bin/"
 
+# Tray icon support: the app loads libayatana-appindicator at runtime
+# (dlopen) and runs without it. Bundle it when the build system has it so the
+# tray also works on distributions that don't install it by default.
+TRAY_LIBS=(libayatana-appindicator3.so.1 libdbusmenu-gtk3.so.4 libdbusmenu-glib.so.4)
+for lib in "${TRAY_LIBS[@]}"; do
+  # (no early exit in awk: with pipefail that would fail the pipeline)
+  path="$(ldconfig -p | awk -v l="$lib" '$1 == l && /x86-64/ && !found {print $NF; found=1}' || true)"
+  if [[ -n "$path" ]]; then
+    cp -L "$path" "$APPDIR/usr/bin/lib/$lib"
+    echo "    bundled $lib"
+  else
+    echo "    WARNING: $lib not found, the tray icon needs it installed on the system"
+  fi
+done
+
 for size in 16 24 32 48 64 128 256 512; do
   mkdir -p "$APPDIR/usr/share/icons/hicolor/${size}x${size}/apps"
   cp "$PACKAGING_DIR/icons/$size.png" \

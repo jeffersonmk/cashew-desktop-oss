@@ -23,6 +23,7 @@ import 'package:budget/widgets/globalLoadingProgress.dart';
 import 'package:budget/struct/scrollBehaviorOverride.dart';
 import 'package:budget/widgets/globalSnackbar.dart';
 import 'package:budget/struct/initializeNotifications.dart';
+import 'package:budget/struct/desktopIntegration.dart';
 import 'package:budget/widgets/navigationFramework.dart';
 import 'package:budget/widgets/restartApp.dart';
 import 'package:budget/struct/customDelayedCurve.dart';
@@ -57,6 +58,8 @@ void main() async {
     iconObjects.sort((a, b) => (a.mostLikelyCategoryName ?? a.icon)
         .compareTo((b.mostLikelyCategoryName ?? b.icon)));
     setHighRefreshRate();
+    // Cashew Desktop: tray, autostart and notifications on Linux.
+    await initializeDesktopIntegration();
     runApp(
       InitializeLocalizations(
         child: RestartApp(
