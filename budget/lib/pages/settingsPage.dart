@@ -1,3 +1,4 @@
+import 'package:budget/struct/keyboardIntents.dart';
 import 'package:budget/pages/accountsPage.dart';
 import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart' hide AppSettings;
@@ -603,6 +604,17 @@ class SettingsPageContent extends StatelessWidget {
               ? Icons.ballot_outlined
               : Icons.ballot_rounded,
         ),
+
+        // Cashew Desktop: list of keyboard shortcuts (also Ctrl+/ or F1).
+        if (isDesktopPlatform)
+          SettingsContainer(
+            title: "Keyboard shortcuts",
+            description: "Ctrl + /  or  F1",
+            icon: appStateSettings["outlinedIcons"]
+                ? Icons.keyboard_outlined
+                : Icons.keyboard_rounded,
+            onTap: () => openKeyboardShortcutsPopup(),
+          ),
 
         SettingsHeader(title: "import-and-export".tr()),
 
