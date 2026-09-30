@@ -26,8 +26,12 @@ import 'package:sa3_liquid/sa3_liquid.dart';
 import 'package:budget/widgets/openContainerNavigation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-bool premiumPopupEnabled = kIsWeb == false;
-bool tryStoreEnabled = kIsWeb == false && kDebugMode == false;
+// Cashew Desktop: in-app purchases belong to the original app's stores
+// (Google Play / App Store) and don't exist on desktop, so the premium popups,
+// banner and store connection are disabled there. All features stay unlocked.
+bool premiumPopupEnabled = kIsWeb == false && !isDesktopPlatform;
+bool tryStoreEnabled =
+    kIsWeb == false && kDebugMode == false && !isDesktopPlatform;
 StreamSubscription<List<PurchaseDetails>>? purchaseListener;
 Map<String, ProductDetails> storeProducts = {};
 Map<String, String> productIDs = {
@@ -1402,7 +1406,7 @@ class PremiumBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) return SizedBox.shrink();
+    if (kIsWeb || isDesktopPlatform) return SizedBox.shrink();
     double borderRadius = 15;
     bool purchased = appStateSettings["purchaseID"] != null;
 

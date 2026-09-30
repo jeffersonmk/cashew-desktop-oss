@@ -115,10 +115,11 @@ class MoreActionsPageState extends State<MoreActionsPage> {
           ),
         ],
         listWidgets: [
-          Padding(
-            padding: const EdgeInsetsDirectional.only(bottom: 8.0),
-            child: PremiumBanner(),
-          ),
+          if (!isDesktopPlatform)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(bottom: 8.0),
+              child: PremiumBanner(),
+            ),
           MorePages()
         ],
       );

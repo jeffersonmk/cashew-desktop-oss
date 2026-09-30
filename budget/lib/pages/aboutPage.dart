@@ -807,7 +807,7 @@ class AboutLinks extends StatelessWidget {
             _buildTappable(
               context: context,
               isExternalLink: true,
-              onTap: () => openUrl("https://github.com/jameskokoska/Cashew"),
+              onTap: () => openUrl("https://github.com/jeffersonmk/cashew-desktop-oss"),
               icon: MoreIcons.github,
               text: "app-is-open-source".tr(namedArgs: {"app": globalAppName}),
             ),
@@ -824,9 +824,9 @@ class AboutLinks extends StatelessWidget {
             const HorizontalBreak(padding: EdgeInsetsDirectional.zero),
             _buildTappable(
               context: context,
-              isExternalLink: false,
-              onTap: () =>
-                  openBottomSheet(context, RatingPopup(), fullSnap: true),
+              isExternalLink: true,
+              // Cashew Desktop: feedback goes to the fork's GitHub issues.
+              onTap: () => openUrl("https://github.com/jeffersonmk/cashew-desktop-oss/issues"),
               icon: appStateSettings["outlinedIcons"]
                   ? Icons.rate_review_outlined
                   : Icons.rate_review_rounded,
@@ -835,8 +835,8 @@ class AboutLinks extends StatelessWidget {
             const HorizontalBreak(padding: EdgeInsetsDirectional.zero),
             _buildTappable(
               context: context,
-              isExternalLink: false,
-              onTap: () => showChangelogForce(context),
+              isExternalLink: true,
+              onTap: () => openUrl("https://github.com/jeffersonmk/cashew-desktop-oss/releases"),
               icon: appStateSettings["outlinedIcons"]
                   ? Icons.list_alt_outlined
                   : Icons.list_alt_rounded,
@@ -856,7 +856,7 @@ class AboutLinks extends StatelessWidget {
             _buildTappable(
               context: context,
               isExternalLink: true,
-              onTap: () => openUrl("https://cashewapp.web.app/policy.html"),
+              onTap: () => openUrl("https://github.com/jeffersonmk/cashew-desktop-oss#privacy"),
               icon: appStateSettings["outlinedIcons"]
                   ? Icons.policy_outlined
                   : Icons.policy_rounded,

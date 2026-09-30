@@ -50,6 +50,16 @@ Where your data lives on Linux:
 | Database | `~/.local/share/io.github.jeffersonmk.CashewDesktop/db.sqlite` |
 | Backups (default) | `~/.local/share/io.github.jeffersonmk.CashewDesktop/backups/` |
 
+## Privacy
+
+- Your financial data is stored **only on your computer** (see the paths
+  above). There is no account, no cloud sync and no analytics.
+- The only network request the app makes on its own is downloading public
+  currency exchange rates from
+  [jsDelivr](https://github.com/fawazahmed0/exchange-api). No personal data
+  is sent.
+- Links (GitHub, help pages) only open in your browser when you click them.
+
 ## Download (AppImage)
 
 Get the latest `Cashew_Desktop-*-x86_64.AppImage` from the

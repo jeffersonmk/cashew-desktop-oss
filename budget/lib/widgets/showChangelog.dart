@@ -2473,6 +2473,10 @@ bool showChangelog(
     updateGlobalState: false,
   );
 
+  // Cashew Desktop: the bundled changelog belongs to upstream Cashew (5.x)
+  // and doesn't match this fork's versions, so it is only shown on request.
+  if (!forceShow) return false;
+
   //Don't show changelog on first login and only show if english, unless forced
   if (changelogPoints != null &&
       changelogPoints.length > 0 &&
@@ -2604,13 +2608,7 @@ int parseVersionInt(String versionString) {
 
 String getVersionString() {
   String version = packageInfoGlobal?.version ?? "";
-  String buildNumber = packageInfoGlobal?.buildNumber ?? "";
-  return "v" +
-      version +
-      "+" +
-      buildNumber +
-      ", db-v" +
-      schemaVersionGlobal.toString();
+  return "v" + version + " (db-v" + schemaVersionGlobal.toString() + ")";
 }
 
 class MajorChanges {

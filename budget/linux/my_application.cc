@@ -14,6 +14,17 @@ struct _MyApplication {
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
+// Cashew Desktop: closing the window used to crash the app (segfault inside
+// the Flutter engine while GTK destroyed the window). Instead of letting GTK
+// destroy the window, hide it and stop the application's main loop; the
+// process then exits normally from main().
+static gboolean on_window_delete(GtkWidget* widget, GdkEvent* event,
+                                 gpointer user_data) {
+  gtk_widget_hide(widget);
+  g_application_quit(G_APPLICATION(user_data));
+  return TRUE;  // don't destroy the window
+}
+
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
@@ -60,6 +71,8 @@ static void my_application_activate(GApplication* application) {
       gtk_window_set_icon_from_file(window, icon_path, nullptr);
     }
   }
+  g_signal_connect(window, "delete-event", G_CALLBACK(on_window_delete),
+                   application);
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
