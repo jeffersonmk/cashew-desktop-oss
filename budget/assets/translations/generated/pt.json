@@ -1216,5 +1216,7 @@
   "update-available-description": "A versão {version} foi lançada (você tem a {current}). Toque para abrir a página de download.",
   "up-to-date": "Você está na versão mais recente",
   "update-check-failed": "Não foi possível verificar atualizações",
-  "update-check-failed-description": "Confira sua conexão com a internet e tente de novo"
+  "update-check-failed-description": "Confira sua conexão com a internet e tente de novo",
+  "desktop-dialogs": "Painéis como janelas",
+  "desktop-dialogs-description": "As opções abrem numa janela no centro, em vez de um painel que sobe de baixo"
 }

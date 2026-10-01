@@ -1216,5 +1216,7 @@
   "update-available-description": "Version {version} is out (you have {current}). Tap to open the download page.",
   "up-to-date": "You have the latest version",
   "update-check-failed": "Could not check for updates",
-  "update-check-failed-description": "Check your internet connection and try again"
+  "update-check-failed-description": "Check your internet connection and try again",
+  "desktop-dialogs": "Popups as Windows",
+  "desktop-dialogs-description": "Options open in a window in the center instead of a panel sliding up from the bottom"
 }

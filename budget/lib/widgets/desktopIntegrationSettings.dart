@@ -89,6 +89,19 @@ class _DesktopIntegrationSettingsState
           },
         ),
         SettingsContainerSwitch(
+          title: "desktop-dialogs".tr(),
+          description: "desktop-dialogs-description".tr(),
+          initialValue: appStateSettings["desktopDialogs"] != false,
+          icon: outlined
+              ? Icons.picture_in_picture_outlined
+              : Icons.picture_in_picture_rounded,
+          onSwitched: (value) async {
+            await updateSettings("desktopDialogs", value,
+                updateGlobalState: false);
+            return true;
+          },
+        ),
+        SettingsContainerSwitch(
           title: "check-for-updates".tr(),
           description: "check-for-updates-description".tr(),
           initialValue: appStateSettings["desktopCheckForUpdates"] == true,

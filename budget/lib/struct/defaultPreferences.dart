@@ -156,6 +156,7 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "desktopLastWindowOpenedDay": "",
     "desktopNotifiedUpcoming": {},
     "desktopCheckForUpdates": true,
+    "desktopDialogs": true,
     "desktopLastUpdateCheck": "",
     "desktopNotifiedUpdateVersion": "",
     "notificationsReminderType": ReminderNotificationType.IfAppNotOpened.index,

@@ -14,6 +14,13 @@ How to use:
 
 ## [Unreleased]
 
+### Changed
+- Popups (choosing a category, entering the amount, picking a color, the
+  title, the repeat period, and so on) open as a window in the center of the
+  screen instead of a panel sliding up from the bottom. Narrow windows keep
+  the bottom panel. Can be turned off in Settings → Desktop → "Popups as
+  windows".
+
 ## [1.0.3] - 2026-09-30
 
 ### Added

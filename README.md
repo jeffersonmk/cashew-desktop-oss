@@ -146,6 +146,7 @@ Debug builds print the app logs to the terminal.
 - [x] Right-click menu on transactions
 - [x] Desktop notifications, tray icon and start with the system
 - [x] Update check (notice when a new release is out)
+- [x] Popups as centered windows instead of bottom panels
 
 ## Contact
 

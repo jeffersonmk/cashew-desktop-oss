@@ -1,3 +1,4 @@
+import 'package:budget/struct/desktopIntegration.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/navigationSidebar.dart';
@@ -64,6 +65,64 @@ Color getPopupBackgroundColor(BuildContext context) {
       : getColor(context, "lightDarkAccent");
 }
 
+// Cashew Desktop: popups as centered dialogs on wide desktop windows.
+// Can be turned off in Settings -> Desktop ("desktopDialogs").
+bool useDesktopDialogs(BuildContext context) {
+  if (!isDesktopPlatform) return false;
+  if (appStateSettings["desktopDialogs"] == false) return false;
+  return getIsFullScreen(context);
+}
+
+Future _openDesktopDialog(
+  BuildContext context,
+  Widget child, {
+  required bool isDismissable,
+  BuildContext? themeContext,
+}) {
+  return showDialog(
+    context: context,
+    useRootNavigator: false,
+    barrierDismissible: isDismissable,
+    barrierColor: Colors.black.withOpacity(0.45),
+    builder: (dialogContext) {
+      if (checkIfDefaultThemeData(themeContext)) themeContext = null;
+      BuildContext themed = themeContext ?? dialogContext;
+      return PopScope(
+        // Same as the sheet: a non-dismissable popup ignores Esc / back.
+        canPop: isDismissable,
+        child: Dialog(
+          backgroundColor: getPopupBackgroundColor(themed),
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: 32,
+            vertical: 24,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusDirectional.circular(20),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              // Same width the content gets inside a sheet (layouts such as
+              // the category grid are computed from getWidthBottomSheet).
+              maxWidth: getWidthBottomSheet(dialogContext),
+              maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.88,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Theme(
+                data: Theme.of(themed),
+                child: SingleChildScrollView(child: child),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
 SheetController? bottomSheetControllerGlobalCustomAssigned;
 
 late SheetController bottomSheetControllerGlobal;
@@ -107,6 +166,18 @@ Future openBottomSheet(
       useParentContextForTheme && isContextValidForTheme(context)
           ? context
           : null;
+
+  // Cashew Desktop: on a wide desktop window, show the same content as a
+  // centered dialog instead of a sheet sliding up from the bottom. Narrow
+  // windows (no sidebar) keep the sheet, which works better there.
+  if (useDesktopDialogs(context) && customBuilder == null) {
+    return await _openDesktopDialog(
+      context,
+      child,
+      isDismissable: isDismissable,
+      themeContext: themeContext,
+    );
+  }
 
   return await showSlidingBottomSheet(
     context,
