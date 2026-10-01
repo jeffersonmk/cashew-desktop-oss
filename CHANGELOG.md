@@ -20,6 +20,13 @@ How to use:
   screen instead of a panel sliding up from the bottom. Narrow windows keep
   the bottom panel. Can be turned off in Settings → Desktop → "Popups as
   windows".
+- Portuguese: fixed 77 machine-translation mistakes in pt-BR (46 also in
+  pt-PT), e.g. "Inscrição" → "Assinatura", "balanço/equilíbrio" → "saldo",
+  "Coletado" → "Recebido", "Repita todos" → "Repetir a cada". New default
+  category names: Mercado, Restaurantes, Transporte (existing categories keep
+  their names).
+- Popup titles use sentence case outside English ("Insira o valor" instead of
+  "Insira A Quantia").
 
 ## [1.0.3] - 2026-09-30
 

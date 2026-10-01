@@ -36,6 +36,15 @@ extension CapExtension on String {
       .split(" ")
       .map((str) => str.capitalizeFirst)
       .join(" ");
+
+  // Cashew Desktop: "Title Case" only in English. Other languages (pt, es,
+  // fr, ...) write titles in sentence case: "Insira a quantia", not
+  // "Insira A Quantia".
+  String get capitalizeTitle {
+    String? locale = navigatorKey.currentContext?.locale.languageCode;
+    if (locale == null || locale == "en") return this.capitalizeFirstofEach;
+    return this.capitalizeFirst;
+  }
 }
 
 extension DateUtils on DateTime {
