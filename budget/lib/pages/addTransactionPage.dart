@@ -1,3 +1,4 @@
+import 'package:budget/struct/localAttachments.dart';
 import 'package:budget/database/generatePreviewData.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
@@ -4176,9 +4177,11 @@ class LinkInNotes extends StatelessWidget {
     this.iconDataAfter,
     this.color,
     this.extraWidget,
+    this.text,
     super.key,
   });
   final String link;
+  final String? text;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final IconData? iconData;
@@ -4213,7 +4216,7 @@ class LinkInNotes extends StatelessWidget {
             SizedBox(width: 10),
             Expanded(
               child: TextFont(
-                text: getDomainNameFromURL(link),
+                text: text ?? getDomainNameFromURL(link),
                 fontSize: 16,
                 maxLines: 1,
               ),
@@ -4342,11 +4345,20 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                       for (String link in extractedLinks)
                         LinkInNotes(
                           link: link,
+                          iconData: isLocalAttachmentLink(link)
+                              ? (appStateSettings["outlinedIcons"]
+                                  ? Icons.attach_file_outlined
+                                  : Icons.attach_file_rounded)
+                              : null,
                           onLongPress: () {
                             copyToClipboard(link);
                           },
                           onTap: () async {
-                            openUrl(link);
+                            if (isLocalAttachmentLink(link)) {
+                              openLocalAttachment(link);
+                            } else {
+                              openUrl(link);
+                            }
                           },
                           extraWidget: Row(
                             children: [
@@ -4365,9 +4377,13 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                       icon: appStateSettings["outlinedIcons"]
                                           ? Icons.link_off_outlined
                                           : Icons.link_off_rounded,
-                                      title: "remove-link-question".tr(),
-                                      description:
-                                          "remove-link-description".tr(),
+                                      title: isLocalAttachmentLink(link)
+                                          ? "remove-attachment-question".tr()
+                                          : "remove-link-question".tr(),
+                                      description: isLocalAttachmentLink(link)
+                                          ? "remove-attachment-description"
+                                              .tr()
+                                          : null,
                                       onCancel: () {
                                         popRoute(context);
                                       },
@@ -4387,6 +4403,25 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                     ],
                   ),
           ),
+          // Cashew Desktop: local attachments (copied into the data folder).
+          if (localAttachmentsSupported)
+            LinkInNotes(
+              link: "",
+              text: "add-attachment".tr(),
+              color: (appStateSettings["materialYou"]
+                  ? Theme.of(context).colorScheme.secondaryContainer
+                  : getColor(context, "canvasContainer")),
+              iconData: appStateSettings["outlinedIcons"]
+                  ? Icons.attach_file_outlined
+                  : Icons.attach_file_rounded,
+              iconDataAfter: appStateSettings["outlinedIcons"]
+                  ? Icons.add_outlined
+                  : Icons.add_rounded,
+              onTap: () async {
+                String? result = await pickAndAttachFile();
+                addAttachmentLinkToNote(result);
+              },
+            ),
         ],
       ),
     );

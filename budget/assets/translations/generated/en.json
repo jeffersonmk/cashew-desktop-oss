@@ -789,7 +789,7 @@
   "add": "Add",
   "transaction-type": "Transaction Type",
   "do-not-show-again": "Don't show again",
-  "add-attachment": "Add attachment",
+  "add-attachment": "Add Attachment",
   "add-attachment-description": "Attachments are added to your Google Drive",
   "take-photo": "Take Photo",
   "select-photo": "Select Photo",
@@ -1218,5 +1218,12 @@
   "update-check-failed": "Could not check for updates",
   "update-check-failed-description": "Check your internet connection and try again",
   "desktop-dialogs": "Popups as Windows",
-  "desktop-dialogs-description": "Options open in a window in the center instead of a panel sliding up from the bottom"
+  "desktop-dialogs-description": "Options open in a window in the center instead of a panel sliding up from the bottom",
+  "attachment-error": "Could not add the attachment",
+  "attachment-missing": "Attachment not found",
+  "attachment-missing-description": "The file is no longer in the attachments folder",
+  "remove-attachment-question": "Remove Attachment?",
+  "remove-attachment-description": "The file stays in the attachments folder",
+  "attachments-folder": "Attachments Folder",
+  "attachments-folder-description": "Files attached to transactions. Backups (.sqlite) don't include them: copy this folder too"
 }

@@ -14,6 +14,14 @@ How to use:
 
 ## [Unreleased]
 
+### Added
+- Local attachments: "Add attachment" under the transaction notes picks a
+  file (receipt, invoice, photo...) and copies it into the app's data folder
+  (`attachments/`, readable only by your user). Click the paperclip in the
+  transaction list or in the notes to open it. The Data Backup page has an
+  "Attachments folder" shortcut. Note: `.sqlite` backups don't include the
+  files, copy the attachments folder too.
+
 ### Changed
 - Popups (choosing a category, entering the amount, picking a color, the
   title, the repeat period, and so on) open as a window in the center of the

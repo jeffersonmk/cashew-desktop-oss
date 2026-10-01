@@ -1,3 +1,4 @@
+import 'package:budget/struct/localAttachments.dart';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:budget/database/tables.dart';
@@ -1151,7 +1152,7 @@ Future<String> getDeviceInfo() async {
 }
 
 List<String> extractLinks(String text) {
-  RegExp regExp = RegExp(r'https?:\/\/(?:www\.)?\S+(?=\s)');
+  RegExp regExp = RegExp(r'(?:https?:\/\/(?:www\.)?|cashew-attachment:\/\/)\S+(?=\s)');
   Iterable<RegExpMatch> matches = regExp.allMatches(text);
   List<String> links = [];
   for (RegExpMatch match in matches) {
@@ -1161,6 +1162,9 @@ List<String> extractLinks(String text) {
 }
 
 String getDomainNameFromURL(String text) {
+  // Cashew Desktop: local attachments show the file name.
+  if (text.startsWith("cashew-attachment://"))
+    return attachmentDisplayName(text);
   RegExp regExp = RegExp(
       r'^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/?\n]+)',
       multiLine: true,
@@ -1170,7 +1174,7 @@ String getDomainNameFromURL(String text) {
 }
 
 String cleanupNoteStringWithURLs(String text) {
-  RegExp regExp = RegExp(r'https?:\/\/(?:www\.)?\S+(?=\s)',
+  RegExp regExp = RegExp(r'(?:https?:\/\/(?:www\.)?|cashew-attachment:\/\/)\S+(?=\s)',
       multiLine: true, caseSensitive: false);
 
   Iterable<Match> matches = regExp.allMatches(text);

@@ -20,7 +20,7 @@ class LinkHighlighter extends TextEditingController {
   final Pattern pattern;
 
   LinkHighlighter({String? initialText})
-      : pattern = RegExp(r'https?:\/\/(?:www\.)?\S+(?=\s)') {
+      : pattern = RegExp(r'(?:https?:\/\/(?:www\.)?|cashew-attachment:\/\/)\S+(?=\s)') {
     this.text = initialText ?? '';
   }
   @override

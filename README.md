@@ -77,6 +77,9 @@ The window size is remembered between runs
     repository (update check). It can be turned off in
     Settings → Desktop → Check for Updates. Nothing is downloaded or installed
     automatically.
+- Attachments are copied into `attachments/` inside the data folder, readable
+  only by your user. They are not inside the `.sqlite` backups: back up that
+  folder as well.
 - Links (GitHub, help pages) only open in your browser when you click them.
 
 ## Download (AppImage)
@@ -147,6 +150,7 @@ Debug builds print the app logs to the terminal.
 - [x] Desktop notifications, tray icon and start with the system
 - [x] Update check (notice when a new release is out)
 - [x] Popups as centered windows instead of bottom panels
+- [x] Local attachments (receipts, invoices) stored in the data folder
 
 ## Contact
 

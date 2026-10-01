@@ -1,3 +1,4 @@
+import 'package:budget/struct/localAttachments.dart';
 // Cashew Desktop OSS: "Data Backup" page.
 //
 // Replaces the Google account / Google Drive page with local backups:
@@ -231,6 +232,24 @@ class AccountsPageState extends State<AccountsPage> {
             size: 38,
           ),
         ),
+        // Cashew Desktop: attachments live in their own folder; the .sqlite
+        // backups only hold the reference written in the note.
+        if (localAttachmentsSupported)
+          SettingsContainer(
+            title: "attachments-folder".tr(),
+            description: "attachments-folder-description".tr(),
+            icon: appStateSettings["outlinedIcons"]
+                ? Icons.attach_file_outlined
+                : Icons.attach_file_rounded,
+            onTap: () => openAttachmentsFolder(),
+            afterWidget: ButtonIcon(
+              onTap: () => openAttachmentsFolder(),
+              icon: appStateSettings["outlinedIcons"]
+                  ? Icons.open_in_new_outlined
+                  : Icons.open_in_new_rounded,
+              size: 38,
+            ),
+          ),
         SettingsHeader(title: "backups".tr()),
         if (backups.isEmpty)
           Padding(

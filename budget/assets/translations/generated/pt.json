@@ -1218,5 +1218,12 @@
   "update-check-failed": "Não foi possível verificar atualizações",
   "update-check-failed-description": "Confira sua conexão com a internet e tente de novo",
   "desktop-dialogs": "Painéis como janelas",
-  "desktop-dialogs-description": "As opções abrem numa janela no centro, em vez de um painel que sobe de baixo"
+  "desktop-dialogs-description": "As opções abrem numa janela no centro, em vez de um painel que sobe de baixo",
+  "attachment-error": "Não foi possível adicionar o anexo",
+  "attachment-missing": "Anexo não encontrado",
+  "attachment-missing-description": "O arquivo não está mais na pasta de anexos",
+  "remove-attachment-question": "Remover anexo?",
+  "remove-attachment-description": "O arquivo continua na pasta de anexos",
+  "attachments-folder": "Pasta de anexos",
+  "attachments-folder-description": "Arquivos anexados às transações. Os backups (.sqlite) não incluem esses arquivos: copie esta pasta também"
 }

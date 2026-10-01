@@ -3,6 +3,8 @@ import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/openBottomSheet.dart';
+import 'package:budget/struct/localAttachments.dart';
+import 'package:budget/widgets/tappable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +22,31 @@ class TransactionEntryNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Cashew Desktop: transactions with a local attachment show a paperclip
+    // that opens the file (several files: opens the first, tooltip lists all).
+    List<String> attachments = extractLinks(transaction.note.toString() + " ")
+        .where(isLocalAttachmentLink)
+        .toList();
+    if (attachments.isNotEmpty) {
+      return Tooltip(
+        message: attachments.map(attachmentDisplayName).join("\n"),
+        child: Tappable(
+          color: Colors.transparent,
+          borderRadius: 10,
+          onTap: () => openLocalAttachment(attachments.first),
+          child: Padding(
+            padding: padding,
+            child: Icon(
+              appStateSettings["outlinedIcons"]
+                  ? Icons.attach_file_outlined
+                  : Icons.attach_file_rounded,
+              size: 22,
+              color: iconColor,
+            ),
+          ),
+        ),
+      );
+    }
     return transaction.note.toString().trim() != ""
         ? Tooltip(
             padding: EdgeInsetsDirectional.only(
