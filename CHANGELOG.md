@@ -14,6 +14,8 @@ How to use:
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-10-01
+
 ### Added
 - Local attachments: "Add attachment" under the transaction notes picks a
   file (receipt, invoice, photo...) and copies it into the app's data folder
@@ -112,7 +114,8 @@ First release of Cashew Desktop, a fork of
 ### Fixed
 - Startup on Linux (notifications and time zone detection).
 
-[Unreleased]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.3...HEAD
+[Unreleased]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.4...HEAD
+[1.0.4]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.0...v1.0.1
