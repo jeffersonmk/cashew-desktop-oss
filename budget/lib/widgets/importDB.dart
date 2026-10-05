@@ -1,3 +1,4 @@
+import 'package:budget/struct/fullBackup.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/struct/settings.dart';
@@ -27,7 +28,8 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
 
   String fileName = result.files.single.name;
   if (fileName.endsWith('.sql') == false &&
-      fileName.endsWith('.sqlite') == false) {
+      fileName.endsWith('.sqlite') == false &&
+      fileName.endsWith('.zip') == false) {
     openSnackbar(SnackbarMessage(
       title: "import-warning".tr(),
       description: "import-warning-description".tr(),
@@ -43,8 +45,14 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
     await overwriteDefaultDB(fileBytes);
   } else {
     File file = File(result.files.single.path ?? "");
-    Uint8List fileBytes = await file.readAsBytes();
-    await overwriteDefaultDB(fileBytes);
+    if (isZipBackup(file.path)) {
+      // Cashew Desktop: full backup with attachments.
+      ZipBackupContents contents = await readZipBackup(file.path);
+      await overwriteDefaultDB(contents.databaseBytes);
+    } else {
+      Uint8List fileBytes = await file.readAsBytes();
+      await overwriteDefaultDB(fileBytes);
+    }
   }
   await resetLanguageToSystem(context);
   await updateSettings("databaseJustImported", true,

@@ -155,6 +155,64 @@ Future<bool> openLocalAttachment(String link) async {
   return await _openWithSystem(file.path);
 }
 
+// ---------------------------------------------------------------------------
+// Drag and drop. The native side calls handleDroppedFiles(); the screen that
+// can take attachments (add/edit transaction notes) registers a handler while
+// it is visible. The most recently registered handler wins.
+// ---------------------------------------------------------------------------
+
+typedef DroppedAttachmentHandler = void Function(List<String> links);
+
+final List<DroppedAttachmentHandler> _dropHandlers = [];
+
+void registerAttachmentDropHandler(DroppedAttachmentHandler handler) {
+  _dropHandlers.remove(handler);
+  _dropHandlers.add(handler);
+}
+
+void unregisterAttachmentDropHandler(DroppedAttachmentHandler handler) {
+  _dropHandlers.remove(handler);
+}
+
+Future<void> handleDroppedFiles(List<String> paths) async {
+  if (!localAttachmentsSupported) return;
+  if (_dropHandlers.isEmpty) {
+    openSnackbar(SnackbarMessage(
+      title: "drop-attachment-here".tr(),
+      description: "drop-attachment-here-description".tr(),
+      icon: Icons.attach_file_rounded,
+    ));
+    return;
+  }
+  List<String> links = [];
+  for (String path in paths) {
+    File file = File(path);
+    // Regular files only (no folders, no device files).
+    if (FileSystemEntity.typeSync(path, followLinks: true) !=
+        FileSystemEntityType.file) continue;
+    try {
+      links.add(await copyFileToAttachments(file));
+    } catch (e) {
+      print("Attachment error: " + e.toString());
+    }
+  }
+  if (links.isEmpty) {
+    openSnackbar(SnackbarMessage(
+      title: "attachment-error".tr(),
+      icon: Icons.warning_rounded,
+    ));
+    return;
+  }
+  _dropHandlers.last(links);
+  openSnackbar(SnackbarMessage(
+    title: links.length == 1
+        ? "attachment-added".tr()
+        : "attachments-added".tr(namedArgs: {"count": links.length.toString()}),
+    description: links.map(attachmentDisplayName).join(", "),
+    icon: Icons.attach_file_rounded,
+  ));
+}
+
 Future<bool> openAttachmentsFolder() async {
   Directory directory = await getAttachmentsDirectory();
   return await _openWithSystem(directory.path);

@@ -4282,14 +4282,22 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
     }
   }
 
+  void _onFilesDropped(List<String> links) {
+    for (String link in links) addAttachmentLinkToNote(link);
+  }
+
   @override
   void initState() {
     super.initState();
     widget.noteInputController.addListener(_printLatestValue);
+    // Cashew Desktop: files dropped on the window while this screen is open
+    // become attachments of this transaction.
+    registerAttachmentDropHandler(_onFilesDropped);
   }
 
   @override
   void dispose() {
+    unregisterAttachmentDropHandler(_onFilesDropped);
     widget.noteInputController.removeListener(_printLatestValue);
     super.dispose();
   }

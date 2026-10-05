@@ -14,6 +14,14 @@ How to use:
 
 ## [Unreleased]
 
+### Added
+- Backups include the attachments: when there are attached files, the backup
+  (automatic, "Backup" and "Export") is a single `.zip` with the database and
+  the attachments. Restoring or importing it brings the attachments back
+  (files already in the attachments folder are kept). Without attachments the
+  backup is still a plain `.sqlite`.
+- Drag and drop: drop files on the add/edit transaction screen to attach them.
+
 ## [1.0.4] - 2026-10-01
 
 ### Added

@@ -12,6 +12,7 @@
 //
 // The native side lives in linux/my_application.cc ("cashew/window" channel).
 
+import 'package:budget/struct/localAttachments.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -73,6 +74,10 @@ Future<dynamic> _onNativeCall(MethodCall call) async {
       break;
     case "windowShown":
       await recordWindowOpened();
+      break;
+    case "filesDropped":
+      List paths = (call.arguments?["paths"] as List?) ?? [];
+      await handleDroppedFiles(paths.map((p) => p.toString()).toList());
       break;
   }
   return null;

@@ -7,6 +7,10 @@ import 'package:budget/widgets/util/saveFile.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:io';
+
+import 'package:budget/struct/fullBackup.dart';
+import 'package:path/path.dart' as p;
 
 Future saveDBFileToDevice({
   required BuildContext boxContext,
@@ -24,6 +28,20 @@ Future saveDBFileToDevice({
   List<int> dataStore = [];
   await for (var data in currentDBFileInfo.mediaStream) {
     dataStore.insertAll(dataStore.length, data);
+  }
+
+  // Cashew Desktop: with attachments, export one .zip with everything.
+  List<File> attachments = await listAttachmentFiles();
+  if (attachments.isNotEmpty) {
+    Directory temp = await Directory.systemTemp.createTemp("cashew-export-");
+    try {
+      String zipPath = p.join(temp.path, "backup.zip");
+      await writeZipBackup(zipPath, dataStore, attachments);
+      dataStore = await File(zipPath).readAsBytes();
+    } finally {
+      await temp.delete(recursive: true);
+    }
+    fileName = p.setExtension(fileName, ".zip");
   }
 
   return await saveFile(

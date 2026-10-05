@@ -151,6 +151,42 @@ static void invoke_dart(MyApplication* self, const gchar* method,
                                   nullptr, nullptr);
 }
 
+// ---------------------------------------------------------------------------
+// Drag and drop: files dropped on the window are sent to Dart ("filesDropped"
+// with a list of local paths). Only file:// URIs are accepted.
+// ---------------------------------------------------------------------------
+
+static void on_drag_data_received(GtkWidget* widget, GdkDragContext* context,
+                                  gint x, gint y, GtkSelectionData* data,
+                                  guint info, guint time, gpointer user_data) {
+  MyApplication* self = MY_APPLICATION(user_data);
+  g_auto(GStrv) uris = gtk_selection_data_get_uris(data);
+  g_autoptr(FlValue) paths = fl_value_new_list();
+  if (uris != nullptr) {
+    for (gint i = 0; uris[i] != nullptr; i++) {
+      g_autofree gchar* path = g_filename_from_uri(uris[i], nullptr, nullptr);
+      if (path != nullptr) fl_value_append_take(paths, fl_value_new_string(path));
+    }
+  }
+  gboolean ok = fl_value_get_length(paths) > 0;
+  if (ok) {
+    g_autoptr(FlValue) args = fl_value_new_map();
+    fl_value_set_string_take(args, "paths", fl_value_ref(paths));
+    // Flutter coordinates are logical pixels, same as GTK widget coordinates.
+    fl_value_set_string_take(args, "x", fl_value_new_float(x));
+    fl_value_set_string_take(args, "y", fl_value_new_float(y));
+    invoke_dart(self, "filesDropped", args);
+  }
+  gtk_drag_finish(context, ok, FALSE, time);
+}
+
+static void setup_drag_and_drop(MyApplication* self, GtkWidget* target) {
+  gtk_drag_dest_set(target, GTK_DEST_DEFAULT_ALL, nullptr, 0, GDK_ACTION_COPY);
+  gtk_drag_dest_add_uri_targets(target);
+  g_signal_connect(target, "drag-data-received",
+                   G_CALLBACK(on_drag_data_received), self);
+}
+
 static void show_main_window(MyApplication* self) {
   if (self->window == nullptr) return;
   self->start_minimized = FALSE;
@@ -592,6 +628,8 @@ static void my_application_activate(GApplication* application) {
       "cashew/window", FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(
       self->window_channel, window_method_call_cb, self, nullptr);
+
+  setup_drag_and_drop(self, GTK_WIDGET(view));
 
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }

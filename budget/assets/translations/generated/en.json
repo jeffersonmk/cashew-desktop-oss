@@ -1225,5 +1225,9 @@
   "remove-attachment-question": "Remove Attachment?",
   "remove-attachment-description": "The file stays in the attachments folder",
   "attachments-folder": "Attachments Folder",
-  "attachments-folder-description": "Files attached to transactions. Backups (.sqlite) don't include them: copy this folder too"
+  "attachments-folder-description": "Files attached to transactions. Backups include them (as a .zip)",
+  "attachment-added": "Attachment added",
+  "attachments-added": "{count} attachments added",
+  "drop-attachment-here": "Open a transaction to attach files",
+  "drop-attachment-here-description": "Drop files on the add or edit transaction screen"
 }

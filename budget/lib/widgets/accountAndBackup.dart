@@ -11,6 +11,7 @@ import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/main.dart';
 import 'package:budget/struct/databaseGlobal.dart';
+import 'package:budget/struct/fullBackup.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/globalSnackbar.dart';
 import 'package:budget/widgets/importDB.dart';
@@ -113,7 +114,9 @@ Future<List<File>> getLocalBackups() async {
       .whereType<File>()
       .where((file) =>
           p.basename(file.path).startsWith(localBackupFilePrefix) &&
-          (file.path.endsWith(".sqlite") || file.path.endsWith(".sql")))
+          (file.path.endsWith(".sqlite") ||
+              file.path.endsWith(".sql") ||
+              file.path.endsWith(".zip")))
       .toList();
   files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
   return files;
@@ -127,9 +130,22 @@ Future<File?> createLocalBackup({bool silent = false}) async {
     DBFileInfo currentDBFileInfo = await getCurrentDBFileInfo();
     Directory directory = await getLocalBackupDirectory();
     String timestamp = DateFormat("yyyy-MM-dd-HHmmss").format(DateTime.now());
-    File backupFile = File(p.join(directory.path,
-        "$localBackupFilePrefix$timestamp-v$schemaVersionGlobal.sqlite"));
-    await backupFile.writeAsBytes(currentDBFileInfo.dbFileBytes, flush: true);
+    // Cashew Desktop: with attachments, one .zip holds the database and the
+    // files; otherwise a plain .sqlite as before.
+    List<File> attachments = await listAttachmentFiles();
+    String baseName = "$localBackupFilePrefix$timestamp-v$schemaVersionGlobal";
+    File backupFile;
+    if (attachments.isNotEmpty) {
+      backupFile = File(p.join(directory.path, baseName + ".zip"));
+      await writeZipBackup(
+          backupFile.path, currentDBFileInfo.dbFileBytes, attachments);
+    } else {
+      backupFile = File(p.join(directory.path, baseName + ".sqlite"));
+      await backupFile.writeAsBytes(currentDBFileInfo.dbFileBytes, flush: true);
+    }
+    if (Platform.isLinux || Platform.isMacOS) {
+      await Process.run("chmod", ["600", backupFile.path]);
+    }
     await updateSettings("lastBackup", DateTime.now().toString(),
         pagesNeedingRefresh: [], updateGlobalState: false);
     await deleteOldLocalBackups();
@@ -199,7 +215,12 @@ Future<void> restoreLocalBackup(BuildContext context, File file) async {
   );
   if (result != true) return;
   await openLoadingPopupTryCatch(() async {
-    await overwriteDefaultDB(await file.readAsBytes());
+    if (isZipBackup(file.path)) {
+      ZipBackupContents contents = await readZipBackup(file.path);
+      await overwriteDefaultDB(contents.databaseBytes);
+    } else {
+      await overwriteDefaultDB(await file.readAsBytes());
+    }
     await resetLanguageToSystem(context);
     await updateSettings("databaseJustImported", true,
         pagesNeedingRefresh: [], updateGlobalState: false);

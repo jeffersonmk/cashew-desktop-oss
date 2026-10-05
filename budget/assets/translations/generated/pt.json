@@ -1225,5 +1225,9 @@
   "remove-attachment-question": "Remover anexo?",
   "remove-attachment-description": "O arquivo continua na pasta de anexos",
   "attachments-folder": "Pasta de anexos",
-  "attachments-folder-description": "Arquivos anexados às transações. Os backups (.sqlite) não incluem esses arquivos: copie esta pasta também"
+  "attachments-folder-description": "Arquivos anexados às transações. Os backups incluem esses arquivos (em .zip)",
+  "attachment-added": "Anexo adicionado",
+  "attachments-added": "{count} anexos adicionados",
+  "drop-attachment-here": "Abra uma transação para anexar arquivos",
+  "drop-attachment-here-description": "Solte os arquivos na tela de adicionar ou editar transação"
 }
