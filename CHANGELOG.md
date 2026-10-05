@@ -22,6 +22,11 @@ How to use:
   backup is still a plain `.sqlite`.
 - Drag and drop: drop files on the add/edit transaction screen to attach them.
 
+### Removed
+- "Rate the app" prompts: the box on the home page (it opened the original
+  app's App Store page) and the star-rating popup. Settings → Feedback now
+  opens the GitHub issues page, like the About page.
+
 ## [1.0.4] - 2026-10-01
 
 ### Added

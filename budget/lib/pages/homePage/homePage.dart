@@ -329,7 +329,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         : SizedBox(height: 5),
                     // Not full screen
                     if (enableDoubleColumn(context) != true) ...[
-                      KeepAliveClientMixin(child: HomePageRatingBox()),
+                      // Cashew Desktop: no "rate the app" box (it pointed to
+                      // the original app's store page).
                       for (String sectionKey
                           in appStateSettings["homePageOrder"])
                         homePageSections[sectionKey] ?? SizedBox.shrink(),

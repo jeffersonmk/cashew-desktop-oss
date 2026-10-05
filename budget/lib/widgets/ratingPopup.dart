@@ -25,7 +25,8 @@ import 'package:budget/widgets/framework/popupFramework.dart';
 final InAppReview inAppReview = InAppReview.instance;
 
 bool openRatingPopupCheck(BuildContext context) {
-  // Disable this for now, we have the new in-home page review popup
+  // Cashew Desktop: no "rate the app" popups. There is no app store page;
+  // feedback goes to the GitHub issues (Settings → Feedback).
   return false;
   if ((appStateSettings["numLogins"] + 1) % 10 == 0 &&
       appStateSettings["submittedFeedback"] != true) {
@@ -205,9 +206,7 @@ Future<bool> shareFeedback(String feedbackText, String feedbackType,
   bool error = false;
 
   try {
-    if ((selectedStars ?? 0) >= 4) {
-      if (await inAppReview.isAvailable()) inAppReview.requestReview();
-    }
+    // Cashew Desktop: no store review request.
   } catch (e) {
     print(e.toString());
     error = true;

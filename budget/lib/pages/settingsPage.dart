@@ -208,9 +208,10 @@ class MorePages extends StatelessWidget {
                   padding: EdgeInsetsDirectional.symmetric(
                       vertical: 5, horizontal: 4),
                   child: SettingsContainer(
-                    onTap: () {
-                      openBottomSheet(context, RatingPopup(), fullSnap: true);
-                    },
+                    // Cashew Desktop: feedback goes to the fork's GitHub
+                    // issues (same as the About page), not a rating popup.
+                    onTap: () => openUrl(
+                        "https://github.com/jeffersonmk/cashew-desktop-oss/issues"),
                     title: "feedback".tr(),
                     icon: appStateSettings["outlinedIcons"]
                         ? Icons.rate_review_outlined
