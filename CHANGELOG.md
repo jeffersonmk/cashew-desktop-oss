@@ -14,6 +14,8 @@ How to use:
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-10-05
+
 ### Added
 - Backups include the attachments: when there are attached files, the backup
   (automatic, "Backup" and "Export") is a single `.zip` with the database and
