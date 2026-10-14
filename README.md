@@ -20,7 +20,7 @@
 
 | | Cashew | Cashew Desktop |
 |---|---|---|
-| Platforms | Android, iOS, Web | **Linux** (Windows planned) |
+| Platforms | Android, iOS, Web | **Linux only** (see below) |
 | Google Sign-In | Yes | **Removed** |
 | Google Drive backup / sync | Yes | **Removed**, replaced by local backups |
 | Shared budgets (Firebase) | Yes | Removed |
@@ -28,6 +28,12 @@
 | Transaction attachments | Uploaded to Google Drive | **Local**: copied into the data folder, included in backups |
 | Notifications | Yes | Yes, as desktop notifications (while the app is running, e.g. in the tray) |
 | "Rate the app" prompts | Yes | Removed |
+
+> **Linux only. No Windows version is planned.** Linux is the maintainer's
+> daily system, and this fork is built, tested and maintained only there.
+> There are no plans to make, test or maintain a Windows build, and Windows
+> requests or bug reports won't be worked on. If you want a Windows version,
+> you are free to fork this project (GPL-3.0) and maintain it yourself.
 
 Everything else (budgets, transactions, goals, subscriptions, loans,
 graphs, CSV import, themes, translations) comes from Cashew.
@@ -177,7 +183,6 @@ Debug builds print the app logs to the terminal.
 - [x] Native Linux build, icon and menu entry
 - [x] AppImage
 - [ ] Flatpak
-- [ ] Windows build
 - [x] Keyboard shortcuts and remembered window size
 - [x] Right-click menu on transactions
 - [x] Desktop notifications, tray icon and start with the system
