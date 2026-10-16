@@ -13,6 +13,7 @@
 // The native side lives in linux/my_application.cc ("cashew/window" channel).
 
 import 'package:budget/struct/localAttachments.dart';
+import 'package:budget/widgets/accountAndBackup.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -75,12 +76,30 @@ Future<dynamic> _onNativeCall(MethodCall call) async {
     case "windowShown":
       await recordWindowOpened();
       break;
+    case "trayAction":
+      await _onTrayAction(call.arguments?.toString());
+      break;
     case "filesDropped":
       List paths = (call.arguments?["paths"] as List?) ?? [];
       await handleDroppedFiles(paths.map((p) => p.toString()).toList());
       break;
   }
   return null;
+}
+
+// Tray menu actions. The window may be hidden, so the backup result is shown
+// as a desktop notification instead of a snackbar.
+Future<void> _onTrayAction(String? action) async {
+  if (action == "newTransaction") {
+    notificationPayload = "addTransaction";
+    runNotificationPayLoadsNoContext();
+  } else if (action == "backup") {
+    File? backup = await createLocalBackup(silent: true);
+    await showDesktopNotification(
+      title: backup != null ? "backup-created".tr() : "error-saving".tr(),
+      body: backup?.path ?? "",
+    );
+  }
 }
 
 // Used by the "only if the app was not opened today" daily reminder.
@@ -107,6 +126,8 @@ Future<void> sendDesktopLabels() async {
     await desktopChannel.invokeMethod("setLabels", {
       "openApp": "tray-open-app".tr(),
       "quit": "quit-app".tr(),
+      "newTransaction": "add-transaction".tr(),
+      "backup": "tray-backup-now".tr(),
       "notificationOpen": "notification-open".tr(),
     });
   } catch (e) {

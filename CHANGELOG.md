@@ -16,6 +16,10 @@ How to use:
 
 ## [1.0.6] - 2026-10-16
 
+### Added
+- Tray icon: left click shows or hides the window; the menu has "Add
+  Transaction" and "Backup Now" (the result is shown as a notification).
+
 ### Changed
 - Built with Flutter 3.47 (was 3.22) and updated dependencies. Rendering now
   uses Impeller.

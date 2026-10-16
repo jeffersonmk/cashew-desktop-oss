@@ -78,7 +78,9 @@ In **Settings → Desktop**:
 
 - **Keep Running in the Tray**: closing the window keeps the app in the
   system tray, so reminders and upcoming-bill notifications keep working.
-  Use **Quit** in the tray menu (or `Ctrl + Q`) to really close it. Needs a
+  Click the tray icon to show or hide the window; its menu also has **Add
+  Transaction** and **Backup Now**. Use **Quit** in the tray menu (or
+  `Ctrl + Q`) to really close it. Needs a
   panel with tray icons (StatusNotifierItem / libayatana-appindicator).
 - **Start with the System**: opens the app minimized to the tray when you log
   in (XDG autostart). If you move or replace the AppImage, open the app once

@@ -25,9 +25,13 @@ struct _MyApplication {
   // Translated labels sent by Dart ("setLabels"); English until then.
   gchar* label_open_app;
   gchar* label_quit;
+  gchar* label_new_transaction;
+  gchar* label_backup;
   gchar* label_notification_open;
   GtkWidget* tray_open_item;
   GtkWidget* tray_quit_item;
+  GtkWidget* tray_new_transaction_item;
+  GtkWidget* tray_backup_item;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
@@ -237,8 +241,15 @@ static const int kIndicatorStatusActive = 1;
 static gboolean load_appindicator() {
   if (appindicator.tried) return appindicator.loaded;
   appindicator.tried = TRUE;
-  const char* libraries[] = {"libayatana-appindicator3.so.1",
-                             "libappindicator3.so.1", nullptr};
+  // The system library comes first: the AppImage bundles an older one
+  // (Ubuntu 22.04) without the "activate" signal used for left clicks.
+  const char* libraries[] = {
+      "/usr/lib/libayatana-appindicator3.so.1",
+      "/usr/lib64/libayatana-appindicator3.so.1",
+      "/usr/lib/x86_64-linux-gnu/libayatana-appindicator3.so.1",
+      "libayatana-appindicator3.so.1",
+      "libappindicator3.so.1",
+      nullptr};
   for (int i = 0; libraries[i] != nullptr; i++) {
     void* handle = dlopen(libraries[i], RTLD_NOW | RTLD_LOCAL);
     if (handle == nullptr) continue;
@@ -294,6 +305,35 @@ static void on_tray_quit(GtkMenuItem* item, gpointer user_data) {
   quit_app(MY_APPLICATION(user_data));
 }
 
+// Left click on the tray icon: show the window, or hide it when it is open.
+static void on_tray_icon_activate(GObject* indicator, gint x, gint y,
+                                  gpointer user_data) {
+  MyApplication* self = MY_APPLICATION(user_data);
+  if (self->window == nullptr) return;
+  if (gtk_widget_get_visible(GTK_WIDGET(self->window)) &&
+      !self->start_minimized) {
+    save_window_state(self->window);
+    gtk_widget_hide(GTK_WIDGET(self->window));
+  } else {
+    show_main_window(self);
+  }
+}
+
+static void tray_action(MyApplication* self, const gchar* action) {
+  g_autoptr(FlValue) args = fl_value_new_string(action);
+  invoke_dart(self, "trayAction", args);
+}
+
+static void on_tray_new_transaction(GtkMenuItem* item, gpointer user_data) {
+  MyApplication* self = MY_APPLICATION(user_data);
+  show_main_window(self);
+  tray_action(self, "newTransaction");
+}
+
+static void on_tray_backup(GtkMenuItem* item, gpointer user_data) {
+  tray_action(MY_APPLICATION(user_data), "backup");
+}
+
 static void enable_tray(MyApplication* self) {
   if (self->indicator != nullptr || !tray_available()) return;
   // The icon is looked up by name in the bundle's data/ folder.
@@ -317,6 +357,18 @@ static void enable_tray(MyApplication* self) {
   self->tray_open_item = open_item;
   g_signal_connect(open_item, "activate", G_CALLBACK(on_tray_open), self);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), open_item);
+  GtkWidget* new_item = gtk_menu_item_new_with_label(
+      self->label_new_transaction != nullptr ? self->label_new_transaction
+                                             : "New Transaction");
+  self->tray_new_transaction_item = new_item;
+  g_signal_connect(new_item, "activate", G_CALLBACK(on_tray_new_transaction),
+                   self);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu), new_item);
+  GtkWidget* backup_item = gtk_menu_item_new_with_label(
+      self->label_backup != nullptr ? self->label_backup : "Backup Now");
+  self->tray_backup_item = backup_item;
+  g_signal_connect(backup_item, "activate", G_CALLBACK(on_tray_backup), self);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu), backup_item);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), gtk_separator_menu_item_new());
   GtkWidget* quit_item = gtk_menu_item_new_with_label(
       self->label_quit != nullptr ? self->label_quit : "Quit");
@@ -329,6 +381,12 @@ static void enable_tray(MyApplication* self) {
   if (appindicator.set_secondary_activate_target != nullptr) {
     appindicator.set_secondary_activate_target(self->indicator, open_item);
   }
+  // Left click (libayatana-appindicator 0.5.92 and newer): toggle the window.
+  // Older versions open the menu instead.
+  if (g_signal_lookup("activate", G_OBJECT_TYPE(self->indicator)) != 0) {
+    g_signal_connect(self->indicator, "activate",
+                     G_CALLBACK(on_tray_icon_activate), self);
+  }
   appindicator.set_status(self->indicator, kIndicatorStatusActive);
 }
 
@@ -336,6 +394,8 @@ static void disable_tray(MyApplication* self) {
   g_clear_object(&self->indicator);
   self->tray_open_item = nullptr;
   self->tray_quit_item = nullptr;
+  self->tray_new_transaction_item = nullptr;
+  self->tray_backup_item = nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -518,6 +578,21 @@ static void window_method_call_cb(FlMethodChannel* channel,
     const gchar* open_app = map_string(args, "openApp");
     const gchar* quit = map_string(args, "quit");
     const gchar* notification_open = map_string(args, "notificationOpen");
+    const gchar* new_transaction = map_string(args, "newTransaction");
+    const gchar* backup = map_string(args, "backup");
+    if (new_transaction != nullptr) {
+      g_free(self->label_new_transaction);
+      self->label_new_transaction = g_strdup(new_transaction);
+      if (self->tray_new_transaction_item != nullptr)
+        gtk_menu_item_set_label(
+            GTK_MENU_ITEM(self->tray_new_transaction_item), new_transaction);
+    }
+    if (backup != nullptr) {
+      g_free(self->label_backup);
+      self->label_backup = g_strdup(backup);
+      if (self->tray_backup_item != nullptr)
+        gtk_menu_item_set_label(GTK_MENU_ITEM(self->tray_backup_item), backup);
+    }
     if (open_app != nullptr) {
       g_free(self->label_open_app);
       self->label_open_app = g_strdup(open_app);
@@ -709,6 +784,8 @@ static void my_application_dispose(GObject* object) {
   g_clear_pointer(&self->notification_payloads, g_hash_table_unref);
   g_clear_pointer(&self->label_open_app, g_free);
   g_clear_pointer(&self->label_quit, g_free);
+  g_clear_pointer(&self->label_new_transaction, g_free);
+  g_clear_pointer(&self->label_backup, g_free);
   g_clear_pointer(&self->label_notification_open, g_free);
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }

@@ -1229,5 +1229,6 @@
   "attachment-added": "Attachment added",
   "attachments-added": "{count} attachments added",
   "drop-attachment-here": "Open a transaction to attach files",
-  "drop-attachment-here-description": "Drop files on the add or edit transaction screen"
+  "drop-attachment-here-description": "Drop files on the add or edit transaction screen",
+  "tray-backup-now": "Backup Now"
 }
