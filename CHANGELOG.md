@@ -24,8 +24,9 @@ How to use:
 - Encrypted backups (optional, in Backups): AES-256-GCM with a password
   (Argon2id). The password is either saved in the system keyring (GNOME
   Keyring/KWallet), so automatic backups keep working, or asked every time.
-  Encrypted backups (`.enc`) can also be opened without the app with
-  `tools/decrypt-backup.py`.
+  An optional recovery key (shown once, to write down) also opens the
+  backups if the password is forgotten. Encrypted backups (`.enc`) can also
+  be opened without the app with `tools/decrypt-backup.py`.
 
 ## [1.0.6] - 2026-10-16
 

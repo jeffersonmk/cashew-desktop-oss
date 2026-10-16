@@ -77,6 +77,27 @@ class AccountsPageState extends State<AccountsPage> {
     return true;
   }
 
+  bool hasRecoveryKey = savedRecoveryPublicKey != null;
+
+  Future<void> newRecoveryKey() async {
+    if (hasRecoveryKey) {
+      dynamic replace = await openPopup(
+        context,
+        icon: Icons.key_outlined,
+        title: "new-recovery-key".tr(),
+        description: "new-recovery-key-warning".tr(),
+        onSubmit: () => popRoute(context, true),
+        onSubmitLabel: "ok".tr(),
+        onCancel: () => popRoute(context),
+        onCancelLabel: "cancel".tr(),
+      );
+      if (replace != true) return;
+    }
+    if (await createAndShowRecoveryKey(context)) {
+      setState(() => hasRecoveryKey = true);
+    }
+  }
+
   Future<bool> setEncryptBackups(bool value) async {
     if (value) {
       if (passwordMode == "keyring") {
@@ -100,6 +121,8 @@ class AccountsPageState extends State<AccountsPage> {
     await updateSettings("encryptBackups", value,
         pagesNeedingRefresh: [], updateGlobalState: false);
     setState(() => encryptBackups = value);
+    // Offer a recovery key right away (can be skipped and made later).
+    if (value && !hasRecoveryKey) await newRecoveryKey();
     return true;
   }
 
@@ -335,6 +358,18 @@ class AccountsPageState extends State<AccountsPage> {
                       : Icons.password_rounded,
                   onTap: () => setKeyringPassword(),
                 ),
+              ),
+              SettingsContainer(
+                title: hasRecoveryKey
+                    ? "new-recovery-key".tr()
+                    : "create-recovery-key".tr(),
+                description: hasRecoveryKey
+                    ? "recovery-key-active-description".tr()
+                    : "recovery-key-missing-description".tr(),
+                icon: appStateSettings["outlinedIcons"]
+                    ? Icons.vpn_key_outlined
+                    : Icons.vpn_key_rounded,
+                onTap: () => newRecoveryKey(),
               ),
             ],
           ),

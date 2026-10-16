@@ -165,7 +165,8 @@ Future<File?> createLocalBackup(
           File(p.join(directory.path, baseName + encryptedBackupExtension));
       Uint8List encrypted = await encryptBackupBytes(
           buildZipBackupBytes(currentDBFileInfo.dbFileBytes, attachments),
-          password);
+          password,
+          recoveryPublicKey: savedRecoveryPublicKey);
       File partial = File(backupFile.path + ".part");
       await partial.writeAsBytes(encrypted, flush: true);
       await partial.rename(backupFile.path);

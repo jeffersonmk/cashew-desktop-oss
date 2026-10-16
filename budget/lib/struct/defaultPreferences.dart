@@ -27,6 +27,7 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "privacyMode": false,
     "encryptBackups": false,
     "backupPasswordMode": "keyring",
+    "backupRecoveryPublicKey": "",
     "appAnimations": AppAnimations.all.index,
     "showFAQAndHelpLink": true,
     "showExtraInfoText": true,

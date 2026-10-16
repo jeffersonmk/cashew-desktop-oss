@@ -86,8 +86,15 @@ lives:
 - **Ask every time**: typed for every backup and restore; automatic backups
   are skipped.
 
-Encrypted backups end in `.enc`. **Without the password they cannot be
-restored**, so write it down somewhere safe. To open one without the app:
+When you turn encryption on, the app also offers a **recovery key** (shown
+only once): write it down and keep it away from the computer. If you forget
+the password, type the recovery key instead when restoring. **Without the
+password or the recovery key, encrypted backups cannot be restored.**
+**New Recovery Key** makes a new one; backups made before keep opening with
+the old one.
+
+Encrypted backups end in `.enc`. To open one without the app (asks for the
+password or the recovery key):
 
 ```bash
 uv run --with argon2-cffi --with cryptography tools/decrypt-backup.py BACKUP.enc
