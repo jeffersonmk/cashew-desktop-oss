@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animations/animations.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/struct/settings.dart';
@@ -25,7 +27,9 @@ Future<AuthResult> checkBiometrics({
   bool checkAlways = false,
 }) async {
   try {
-    if (kIsWeb) {
+    // Cashew Desktop: Linux has no biometrics plugin. Calling it throws, and
+    // on the first launch after a restore that showed a "Biometrics Error".
+    if (kIsWeb || Platform.isLinux) {
       authAvailable = false;
       await updateSettings("requireAuth", false, updateGlobalState: false);
       return AuthResult.authenticated;

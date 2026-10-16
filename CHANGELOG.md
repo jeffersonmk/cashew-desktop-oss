@@ -18,6 +18,10 @@ How to use:
 - Built with Flutter 3.47 (was 3.22) and updated dependencies. Rendering now
   uses Impeller.
 
+### Fixed
+- A "Biometrics Error" popup on the first launch after restoring a backup
+  (Linux has no biometric unlock; the check is now skipped).
+
 ## [1.0.5] - 2026-10-05
 
 ### Added
