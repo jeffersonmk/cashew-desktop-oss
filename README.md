@@ -139,14 +139,14 @@ If it does not start, install FUSE 2 (`libfuse2` on Debian/Ubuntu,
 
 Requirements:
 
-- [Flutter](https://docs.flutter.dev/get-started/install/linux) **3.22.3**
+- [Flutter](https://docs.flutter.dev/get-started/install/linux) **3.47.7**
   (the version is pinned in `.fvmrc`; [fvm](https://fvm.app) is recommended)
 - Linux build tools: `clang cmake ninja-build pkg-config libgtk-3-dev`
 
 ```bash
 git clone https://github.com/jeffersonmk/cashew-desktop-oss.git
 cd cashew-desktop-oss/budget
-fvm install          # or make sure `flutter --version` is 3.22.3
+fvm install          # or make sure `flutter --version` is 3.47.7
 ./linux/packaging/install.sh
 ```
 

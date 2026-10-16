@@ -30,7 +30,7 @@ Future<List<String?>> _candidateNames() async {
     return names;
   }
   try {
-    names.add(await FlutterTimezone.getLocalTimezone());
+    names.add((await FlutterTimezone.getLocalTimezone()).identifier);
   } catch (e) {
     print("Could not read timezone from plugin: " + e.toString());
   }

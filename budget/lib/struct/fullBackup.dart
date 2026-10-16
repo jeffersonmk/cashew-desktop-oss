@@ -55,7 +55,7 @@ Future<void> writeZipBackup(
           file, backupAttachmentsPrefix + p.basename(file.path));
     }
   } finally {
-    encoder.close();
+    await encoder.close();
   }
   await File(partialPath).rename(zipPath);
 }
@@ -72,7 +72,7 @@ Future<ZipBackupContents> readZipBackup(String zipPath,
     {bool restoreAttachments = true}) async {
   InputFileStream input = InputFileStream(zipPath);
   try {
-    Archive archive = ZipDecoder().decodeBuffer(input);
+    Archive archive = ZipDecoder().decodeStream(input);
     Uint8List? databaseBytes;
     int attachmentCount = 0;
     Directory? attachmentsDirectory =

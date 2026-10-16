@@ -14,6 +14,10 @@ How to use:
 
 ## [Unreleased]
 
+### Changed
+- Built with Flutter 3.47 (was 3.22) and updated dependencies. Rendering now
+  uses Impeller.
+
 ## [1.0.5] - 2026-10-05
 
 ### Added
