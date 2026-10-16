@@ -1,3 +1,4 @@
+import 'package:budget/struct/restoreBackup.dart' show beforeRestoreFile;
 import 'package:budget/struct/localAttachments.dart';
 import 'package:budget/struct/attachmentCleanup.dart';
 import 'package:budget/struct/backupEncryption.dart';
@@ -39,6 +40,7 @@ class AccountsPage extends StatefulWidget {
 class AccountsPageState extends State<AccountsPage> {
   bool currentlyExporting = false;
   List<File> backups = [];
+  DateTime? beforeRestoreDate;
   String backupFolder = "";
   bool autoBackups = appStateSettings["autoBackups"] == true;
   bool encryptBackups = appStateSettings["encryptBackups"] == true;
@@ -156,10 +158,14 @@ class AccountsPageState extends State<AccountsPage> {
     try {
       Directory directory = await getLocalBackupDirectory();
       List<File> files = await getLocalBackups();
+      File before = await beforeRestoreFile();
+      DateTime? beforeDate =
+          await before.exists() ? await before.lastModified() : null;
       if (!mounted) return;
       setState(() {
         backupFolder = directory.path;
         backups = files;
+        beforeRestoreDate = beforeDate;
       });
     } catch (e) {
       print("Error listing backups: " + e.toString());
@@ -416,6 +422,18 @@ class AccountsPageState extends State<AccountsPage> {
                 ? Icons.cleaning_services_outlined
                 : Icons.cleaning_services_rounded,
             onTap: () => openUnusedAttachmentsCleanup(context),
+          ),
+        if (beforeRestoreDate != null)
+          SettingsContainer(
+            title: "undo-restore".tr(),
+            description: "undo-restore-description".tr().replaceAll(
+                "{date}",
+                getWordedDateShortMore(beforeRestoreDate!,
+                    includeTime: true, includeYear: true)),
+            icon: appStateSettings["outlinedIcons"]
+                ? Icons.undo_outlined
+                : Icons.undo_rounded,
+            onTap: () => undoLastRestore(context),
           ),
         SettingsHeader(title: "backups".tr()),
         if (backups.isEmpty)

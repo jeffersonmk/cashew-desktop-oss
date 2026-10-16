@@ -1275,5 +1275,14 @@
   "recovery-key-active-description": "Os backups também abrem com sua chave de recuperação",
   "recovery-key-missing-description": "Sem ela, esquecer a senha significa perder os backups",
   "password-or-recovery-key": "Senha ou chave de recuperação",
-  "encrypted-backup-restore-recovery-description": "Digite a senha usada quando este backup foi feito, ou sua chave de recuperação."
+  "encrypted-backup-restore-recovery-description": "Digite a senha usada quando este backup foi feito, ou sua chave de recuperação.",
+  "restart-now": "Reiniciar agora",
+  "restore-summary-transactions": "{n} transações",
+  "restore-summary-attachments": "{n} anexos",
+  "restore-restart-description": "Reinicie o app para abrir os dados restaurados. Os dados anteriores foram guardados: para voltar a eles, use \"Desfazer restauração\" em Backups.",
+  "undo-restore": "Desfazer restauração",
+  "undo-restore-description": "Volta aos dados de antes da restauração de {date}",
+  "undo-restore-warning": "Os dados de antes da última restauração voltam. Os dados atuais ficam guardados, então isso também pode ser desfeito.",
+  "undo-restore-confirm": "Desfazer",
+  "not-a-cashew-backup": "Este arquivo não é um backup do Cashew. Nada foi alterado."
 }

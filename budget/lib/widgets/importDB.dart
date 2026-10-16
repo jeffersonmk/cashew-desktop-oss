@@ -1,3 +1,5 @@
+import 'package:budget/struct/restoreBackup.dart';
+import 'package:budget/widgets/accountAndBackup.dart' show openBackupRestoredPopup;
 import 'package:budget/struct/backupEncryption.dart';
 import 'package:budget/struct/fullBackup.dart';
 import 'package:budget/database/tables.dart';
@@ -13,7 +15,9 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
-Future<String?> importDBFileFromDevice(BuildContext context) async {
+// Desktop: returns a RestoreSummary (the database is swapped in at the next
+// start, see restoreBackup.dart). Web: the file name.
+Future<Object?> importDBFileFromDevice(BuildContext context) async {
   // Avoid using a file filter: PlatformException(FilePicker, Unsupported filter....
   FilePickerResult? result = await FilePicker.platform.pickFiles();
   if (result == null) {
@@ -42,26 +46,25 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
   }
 
 
-  if (kIsWeb) {
-    Uint8List fileBytes = result.files.single.bytes!;
-    await overwriteDefaultDB(fileBytes);
-  } else {
+  if (!kIsWeb) {
     File file = File(result.files.single.path ?? "");
     if (isEncryptedBackup(file.path)) {
       // Cashew Desktop: encrypted backup; asks for the password if needed.
       Uint8List? decrypted = await decryptBackupFileInteractive(context, file);
       if (decrypted == null) return null;
       ZipBackupContents contents = await readZipBackupBytes(decrypted);
-      await overwriteDefaultDB(contents.databaseBytes);
+      return await stageRestore(contents.databaseBytes,
+          attachmentCount: contents.attachmentCount);
     } else if (isZipBackup(file.path)) {
       // Cashew Desktop: full backup with attachments.
       ZipBackupContents contents = await readZipBackup(file.path);
-      await overwriteDefaultDB(contents.databaseBytes);
-    } else {
-      Uint8List fileBytes = await file.readAsBytes();
-      await overwriteDefaultDB(fileBytes);
+      return await stageRestore(contents.databaseBytes,
+          attachmentCount: contents.attachmentCount);
     }
+    return await stageRestore(await file.readAsBytes());
   }
+  Uint8List fileBytes = result.files.single.bytes!;
+  await overwriteDefaultDB(fileBytes);
   await resetLanguageToSystem(context);
   await updateSettings("databaseJustImported", true,
       pagesNeedingRefresh: [], updateGlobalState: false);
@@ -105,7 +108,9 @@ Future importDB(BuildContext context, {ignoreOverwriteWarning = false}) async {
         return await importDBFileFromDevice(context);
       },
       onSuccess: (result) {
-        if (result != null)
+        if (result is RestoreSummary) {
+          openBackupRestoredPopup(context, result);
+        } else if (result != null)
           restartAppPopup(
             context,
             description: kIsWeb

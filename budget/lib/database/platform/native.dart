@@ -1,4 +1,5 @@
 // native.dart
+import 'package:budget/struct/restoreBackup.dart' show applyPendingRestore;
 import 'package:budget/database/tables.dart';
 import 'package:budget/struct/databaseGlobal.dart';
 import 'package:drift/native.dart';
@@ -27,7 +28,10 @@ Future<FinanceDatabase> constructDb(String dbName,
   final db = LazyDatabase(() async {
     // put the database file, called db.sqlite here, into the documents folder
     // for your app.
-    final file = File(p.join(await getDatabaseDirectoryPath(), dbName + '.sqlite'));
+    String directory = await getDatabaseDirectoryPath();
+    // Cashew Desktop: a restored backup waits here until the next start.
+    if (dbName == "db") applyPendingRestore(directory);
+    final file = File(p.join(directory, dbName + '.sqlite'));
     // return NativeDatabase(file);
     QueryExecutor foregroundExecutor = NativeDatabase(file);
     QueryExecutor backgroundExecutor = NativeDatabase.createInBackground(file);

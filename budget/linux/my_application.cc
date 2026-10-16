@@ -1,6 +1,7 @@
 #include "my_application.h"
 
 #include <dlfcn.h>
+#include <unistd.h>
 #include <flutter_linux/flutter_linux.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -616,7 +617,34 @@ static void window_method_call_cb(FlMethodChannel* channel,
   FlValue* args = fl_method_call_get_args(method_call);
   g_autoptr(FlMethodResponse) response = nullptr;
 
-  if (g_strcmp0(method, "quit") == 0) {
+  if (g_strcmp0(method, "restart") == 0) {
+    // Cashew Desktop: a small shell waits for this process to end (the
+    // app is single instance) and starts it again: the AppImage file when
+    // running from one, otherwise this binary.
+    const gchar* appimage = g_getenv("APPIMAGE");
+    g_autofree gchar* exe = (appimage != nullptr && appimage[0] != '\0')
+                                ? g_strdup(appimage)
+                                : g_file_read_link("/proc/self/exe", nullptr);
+    gboolean started = FALSE;
+    if (exe != nullptr) {
+      g_autofree gchar* pid = g_strdup_printf("%d", (int)getpid());
+      const gchar* argv[] = {
+          "/bin/sh", "-c",
+          "i=0; while kill -0 \"$1\" 2>/dev/null && [ $i -lt 150 ]; do "
+          "sleep 0.1; i=$((i+1)); done; exec \"$2\"",
+          "cashew-restart", pid, exe, nullptr};
+      g_autoptr(GError) error = nullptr;
+      started = g_spawn_async(nullptr, (gchar**)argv, nullptr,
+                              G_SPAWN_DEFAULT, nullptr, nullptr, nullptr,
+                              &error);
+      if (!started) g_warning("Restart failed: %s", error->message);
+    }
+    response = FL_METHOD_RESPONSE(
+        fl_method_success_response_new(fl_value_new_bool(started)));
+    fl_method_call_respond(method_call, response, nullptr);
+    if (started) quit_app(self);
+    return;
+  } else if (g_strcmp0(method, "quit") == 0) {
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
     fl_method_call_respond(method_call, response, nullptr);
     quit_app(self);

@@ -1275,5 +1275,14 @@
   "recovery-key-active-description": "As cópias também abrem com a sua chave de recuperação",
   "recovery-key-missing-description": "Sem ela, esquecer a palavra-passe significa perder as cópias",
   "password-or-recovery-key": "Palavra-passe ou chave de recuperação",
-  "encrypted-backup-restore-recovery-description": "Escreva a palavra-passe usada quando esta cópia foi feita, ou a sua chave de recuperação."
+  "encrypted-backup-restore-recovery-description": "Escreva a palavra-passe usada quando esta cópia foi feita, ou a sua chave de recuperação.",
+  "restart-now": "Reiniciar agora",
+  "restore-summary-transactions": "{n} transações",
+  "restore-summary-attachments": "{n} anexos",
+  "restore-restart-description": "Reinicie a aplicação para abrir os dados restaurados. Os dados anteriores foram guardados: para voltar a eles, use \"Desfazer restauro\" em Cópias de segurança.",
+  "undo-restore": "Desfazer restauro",
+  "undo-restore-description": "Volta aos dados de antes do restauro de {date}",
+  "undo-restore-warning": "Os dados de antes do último restauro voltam. Os dados atuais ficam guardados, por isso isto também pode ser desfeito.",
+  "undo-restore-confirm": "Desfazer",
+  "not-a-cashew-backup": "Este ficheiro não é uma cópia de segurança do Cashew. Nada foi alterado."
 }

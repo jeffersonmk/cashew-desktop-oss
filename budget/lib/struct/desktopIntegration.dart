@@ -368,3 +368,15 @@ class DesktopNotificationScheduler {
     }
   }
 }
+
+// Closes the app and opens it again (the native side waits for this process
+// to end, then starts the same AppImage or binary).
+Future<void> restartDesktopApp() async {
+  try {
+    bool started = await desktopChannel.invokeMethod("restart") == true;
+    if (started) return;
+  } catch (e) {
+    print("Restart failed: " + e.toString());
+  }
+  await desktopChannel.invokeMethod("quit");
+}

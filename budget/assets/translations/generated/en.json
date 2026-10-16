@@ -1275,5 +1275,14 @@
   "recovery-key-active-description": "Backups can also be opened with your recovery key",
   "recovery-key-missing-description": "Without one, a forgotten password means lost backups",
   "password-or-recovery-key": "Password or recovery key",
-  "encrypted-backup-restore-recovery-description": "Type the password used when this backup was made, or your recovery key."
+  "encrypted-backup-restore-recovery-description": "Type the password used when this backup was made, or your recovery key.",
+  "restart-now": "Restart Now",
+  "restore-summary-transactions": "{n} transactions",
+  "restore-summary-attachments": "{n} attachments",
+  "restore-restart-description": "Restart the app to open the restored data. Your previous data was kept: to go back, use Undo Restore in Backups.",
+  "undo-restore": "Undo Restore",
+  "undo-restore-description": "Go back to the data in use before the restore of {date}",
+  "undo-restore-warning": "The data from before the last restore comes back. The current data is kept, so this can be undone too.",
+  "undo-restore-confirm": "Undo",
+  "not-a-cashew-backup": "This file is not a Cashew backup. Nothing was changed."
 }

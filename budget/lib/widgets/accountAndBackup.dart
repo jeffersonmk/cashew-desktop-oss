@@ -1,3 +1,4 @@
+import 'package:budget/struct/restoreBackup.dart';
 import 'dart:typed_data';
 import 'package:budget/struct/backupEncryption.dart';
 // Cashew Desktop OSS: local-only backups.
@@ -268,28 +269,16 @@ Future<void> restoreLocalBackup(BuildContext context, File file) async {
   await openLoadingPopupTryCatch(() async {
     if (decrypted != null) {
       ZipBackupContents contents = await readZipBackupBytes(decrypted);
-      await overwriteDefaultDB(contents.databaseBytes);
+      return await stageRestore(contents.databaseBytes,
+          attachmentCount: contents.attachmentCount);
     } else if (isZipBackup(file.path)) {
       ZipBackupContents contents = await readZipBackup(file.path);
-      await overwriteDefaultDB(contents.databaseBytes);
-    } else {
-      await overwriteDefaultDB(await file.readAsBytes());
+      return await stageRestore(contents.databaseBytes,
+          attachmentCount: contents.attachmentCount);
     }
-    await resetLanguageToSystem(context);
-    await updateSettings("databaseJustImported", true,
-        pagesNeedingRefresh: [], updateGlobalState: false);
-    return true;
-  }, onSuccess: (_) {
-    openSnackbar(
-      SnackbarMessage(
-        title: "backup-restored".tr(),
-        icon: appStateSettings["outlinedIcons"]
-            ? Icons.settings_backup_restore_outlined
-            : Icons.settings_backup_restore_rounded,
-      ),
-    );
-    restartAppPopup(context,
-        description: "restart-required-to-load-backup".tr());
+    return await stageRestore(await file.readAsBytes());
+  }, onSuccess: (summary) {
+    openBackupRestoredPopup(context, summary);
   }, onError: (e) {
     openSnackbar(SnackbarMessage(
       title: "error-importing".tr(),
@@ -314,4 +303,53 @@ Future<void> createBackupInBackground(context) async {
     print("Creating automatic local backup");
     await createLocalBackup(silent: true);
   }
+}
+
+// Cashew Desktop: after a restore, what was restored and a restart button.
+void openBackupRestoredPopup(BuildContext context, RestoreSummary summary) {
+  List<String> parts = [];
+  if (summary.backupDate != null) {
+    parts.add(getWordedDateShortMore(summary.backupDate!,
+        includeTime: true, includeYear: true));
+  }
+  parts.add("restore-summary-transactions"
+      .tr()
+      .replaceAll("{n}", summary.transactionCount.toString()));
+  if (summary.attachmentCount > 0) {
+    parts.add("restore-summary-attachments"
+        .tr()
+        .replaceAll("{n}", summary.attachmentCount.toString()));
+  }
+  restartAppPopup(
+    context,
+    title: "backup-restored".tr(),
+    subtitle: parts.join(" · "),
+    description: "restore-restart-description".tr(),
+  );
+}
+
+// Cashew Desktop: puts back the data from before the last restore.
+Future<void> undoLastRestore(BuildContext context) async {
+  File before = await beforeRestoreFile();
+  if (!await before.exists()) return;
+  dynamic result = await openPopup(
+    context,
+    title: "undo-restore".tr(),
+    subtitle: getWordedDateShortMore(before.lastModifiedSync(),
+        includeTime: true, includeYear: true),
+    description: "undo-restore-warning".tr(),
+    icon: appStateSettings["outlinedIcons"]
+        ? Icons.undo_outlined
+        : Icons.undo_rounded,
+    onSubmit: () => popRoute(context, true),
+    onSubmitLabel: "undo-restore-confirm".tr(),
+    onCancel: () => popRoute(context),
+    onCancelLabel: "cancel".tr(),
+  );
+  if (result != true) return;
+  await openLoadingPopupTryCatch(() async {
+    return await stageUndoRestore();
+  }, onSuccess: (summary) {
+    openBackupRestoredPopup(context, summary);
+  });
 }

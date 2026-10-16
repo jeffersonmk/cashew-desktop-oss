@@ -31,6 +31,9 @@ How to use:
 ## [1.0.6] - 2026-10-16
 
 ### Added
+- Restoring a backup: a "Restart Now" button reopens the app by itself, and
+  the window shows what was restored (date, transactions, attachments).
+- "Undo Restore" in Backups brings back the data from before the last restore.
 - Tray icon: left click shows or hides the window; the menu has "Add
   Transaction" and "Backup Now" (the result is shown as a notification).
 
@@ -39,6 +42,11 @@ How to use:
   uses Impeller.
 
 ### Fixed
+- Restoring a backup no longer resets the language, and no longer turns off
+  backup encryption or other settings of this computer.
+- A restored backup is checked first and swapped in at the next start instead
+  of being written over the open database; a file that is not a Cashew backup
+  is refused without changing anything.
 - A "Biometrics Error" popup on the first launch after restoring a backup
   (Linux has no biometric unlock; the check is now skipped).
 

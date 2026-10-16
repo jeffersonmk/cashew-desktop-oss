@@ -1,3 +1,4 @@
+import 'package:budget/struct/desktopIntegration.dart' show restartDesktopApp;
 import 'package:budget/struct/localAttachments.dart';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -942,7 +943,10 @@ String pluralString(bool condition, String string) {
 
 bool lockAppWaitForRestart = false;
 void restartAppPopup(context,
-    {String? subtitle, String? description, String? codeBlock}) async {
+    {String? title,
+    String? subtitle,
+    String? description,
+    String? codeBlock}) async {
   // For now, enforce this until better solution found
   if (kIsWeb || true) {
     // Lock the side navigation
@@ -951,9 +955,13 @@ void restartAppPopup(context,
 
     openPopup(
       context,
-      title: kIsWeb
-          ? "please-refresh-the-application".tr()
-          : "please-restart-the-application".tr(),
+      title: title ??
+          (kIsWeb
+              ? "please-refresh-the-application".tr()
+              : "please-restart-the-application".tr()),
+      // Cashew Desktop: the app restarts itself.
+      onSubmit: kIsWeb ? null : () => restartDesktopApp(),
+      onSubmitLabel: kIsWeb ? null : "restart-now".tr(),
       description: description,
       subtitle: subtitle,
       descriptionWidget: codeBlock == null
