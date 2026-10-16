@@ -9,6 +9,9 @@
 // Without attachments the backup stays a plain .sqlite file, exactly as
 // before (and still readable by older versions).
 //
+// With "Encrypt backups" on, the zip is always used and then encrypted into a
+// .enc file (see backupEncryption.dart).
+//
 // Restoring a .zip replaces the database and copies the attachments back
 // (existing attachments are kept). Entries are validated: only "db.sqlite"
 // and "attachments/<plain file name>" are read; anything else, including
@@ -60,6 +63,19 @@ Future<void> writeZipBackup(
   await File(partialPath).rename(zipPath);
 }
 
+// The same zip, in memory (used for encrypted backups).
+Uint8List buildZipBackupBytes(List<int> databaseBytes, List<File> attachments) {
+  Archive archive = Archive();
+  Uint8List bytes = Uint8List.fromList(databaseBytes);
+  archive.addFile(ArchiveFile(backupDatabaseEntry, bytes.length, bytes));
+  for (File file in attachments) {
+    Uint8List content = file.readAsBytesSync();
+    archive.addFile(ArchiveFile(
+        backupAttachmentsPrefix + p.basename(file.path), content.length, content));
+  }
+  return Uint8List.fromList(ZipEncoder().encode(archive));
+}
+
 class ZipBackupContents {
   ZipBackupContents(this.databaseBytes, this.attachmentCount);
   final Uint8List databaseBytes;
@@ -72,7 +88,23 @@ Future<ZipBackupContents> readZipBackup(String zipPath,
     {bool restoreAttachments = true}) async {
   InputFileStream input = InputFileStream(zipPath);
   try {
-    Archive archive = ZipDecoder().decodeStream(input);
+    return await _readArchive(ZipDecoder().decodeStream(input),
+        restoreAttachments: restoreAttachments);
+  } finally {
+    await input.close();
+  }
+}
+
+// Same, for a zip already in memory (a decrypted backup).
+Future<ZipBackupContents> readZipBackupBytes(Uint8List zipBytes,
+    {bool restoreAttachments = true}) {
+  return _readArchive(ZipDecoder().decodeBytes(zipBytes),
+      restoreAttachments: restoreAttachments);
+}
+
+Future<ZipBackupContents> _readArchive(Archive archive,
+    {required bool restoreAttachments}) async {
+  {
     Uint8List? databaseBytes;
     int attachmentCount = 0;
     Directory? attachmentsDirectory =
@@ -103,7 +135,5 @@ Future<ZipBackupContents> readZipBackup(String zipPath,
       throw Exception("db.sqlite not found in the backup");
     }
     return ZipBackupContents(databaseBytes, attachmentCount);
-  } finally {
-    await input.close();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:budget/struct/localAttachments.dart';
 import 'package:budget/struct/attachmentCleanup.dart';
+import 'package:budget/struct/backupEncryption.dart';
 // Cashew Desktop OSS: "Data Backup" page.
 //
 // Replaces the Google account / Google Drive page with local backups:
@@ -40,6 +41,83 @@ class AccountsPageState extends State<AccountsPage> {
   List<File> backups = [];
   String backupFolder = "";
   bool autoBackups = appStateSettings["autoBackups"] == true;
+  bool encryptBackups = appStateSettings["encryptBackups"] == true;
+  String passwordMode =
+      appStateSettings["backupPasswordMode"] == "ask" ? "ask" : "keyring";
+
+  // Asks for a new password and saves it in the keyring.
+  Future<bool> setKeyringPassword() async {
+    if (!await keyringAvailable()) {
+      openSnackbar(SnackbarMessage(
+        title: "keyring-unavailable".tr(),
+        description: "keyring-unavailable-description".tr(),
+        icon: Icons.lock_outlined,
+      ));
+      return false;
+    }
+    String? password = await askBackupPassword(
+      context,
+      title: "set-backup-password".tr(),
+      description: "set-backup-password-description".tr(),
+      confirm: true,
+    );
+    if (password == null) return false;
+    if (!await keyringStorePassword(password)) {
+      openSnackbar(SnackbarMessage(
+        title: "keyring-unavailable".tr(),
+        description: "keyring-save-failed".tr(),
+        icon: Icons.lock_outlined,
+      ));
+      return false;
+    }
+    openSnackbar(SnackbarMessage(
+      title: "backup-password-saved".tr(),
+      icon: Icons.lock_outlined,
+    ));
+    return true;
+  }
+
+  Future<bool> setEncryptBackups(bool value) async {
+    if (value) {
+      if (passwordMode == "keyring") {
+        if (!await setKeyringPassword()) return false;
+      } else {
+        dynamic accepted = await openPopup(
+          context,
+          icon: Icons.lock_outlined,
+          title: "encrypt-backups".tr(),
+          description: "encrypt-backups-ask-warning".tr(),
+          onSubmit: () => popRoute(context, true),
+          onSubmitLabel: "ok".tr(),
+          onCancel: () => popRoute(context),
+          onCancelLabel: "cancel".tr(),
+        );
+        if (accepted != true) return false;
+      }
+    } else {
+      await keyringClearPassword();
+    }
+    await updateSettings("encryptBackups", value,
+        pagesNeedingRefresh: [], updateGlobalState: false);
+    setState(() => encryptBackups = value);
+    return true;
+  }
+
+  Future<void> setPasswordMode(String mode) async {
+    if (mode == passwordMode) return;
+    if (mode == "keyring") {
+      if (!await setKeyringPassword()) {
+        // Dropdown already shows the new value: rebuild with the old one.
+        setState(() {});
+        return;
+      }
+    } else {
+      await keyringClearPassword();
+    }
+    await updateSettings("backupPasswordMode", mode,
+        pagesNeedingRefresh: [], updateGlobalState: false);
+    setState(() => passwordMode = mode);
+  }
 
   @override
   void initState() {
@@ -138,7 +216,7 @@ class AccountsPageState extends State<AccountsPage> {
                           : Icons.save_rounded,
                       onTap: () async {
                         setState(() => currentlyExporting = true);
-                        await createLocalBackup();
+                        await createLocalBackup(context: context);
                         if (mounted) setState(() => currentlyExporting = false);
                         await loadBackups();
                       },
@@ -216,6 +294,50 @@ class AccountsPageState extends State<AccountsPage> {
             await deleteOldLocalBackups();
             await loadBackups();
           },
+        ),
+        // Cashew Desktop: encrypted backups (backupEncryption.dart).
+        SettingsContainerSwitch(
+          onSwitched: (value) => setEncryptBackups(value),
+          initialValue: encryptBackups,
+          title: "encrypt-backups".tr(),
+          description: "encrypt-backups-description".tr(),
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.lock_outlined
+              : Icons.lock_rounded,
+        ),
+        AnimatedExpanded(
+          expand: encryptBackups,
+          child: Column(
+            children: [
+              SettingsContainerDropdown(
+                key: ValueKey(passwordMode),
+                title: "backup-password".tr(),
+                description: passwordMode == "keyring"
+                    ? "backup-password-keyring-description".tr()
+                    : "backup-password-ask-description".tr(),
+                icon: appStateSettings["outlinedIcons"]
+                    ? Icons.key_outlined
+                    : Icons.key_rounded,
+                initial: passwordMode,
+                items: ["keyring", "ask"],
+                getLabel: (item) => item == "keyring"
+                    ? "backup-password-keyring".tr()
+                    : "backup-password-ask".tr(),
+                onChanged: (value) => setPasswordMode(value),
+              ),
+              AnimatedExpanded(
+                expand: passwordMode == "keyring",
+                child: SettingsContainer(
+                  title: "change-backup-password".tr(),
+                  description: "change-backup-password-description".tr(),
+                  icon: appStateSettings["outlinedIcons"]
+                      ? Icons.password_outlined
+                      : Icons.password_rounded,
+                  onTap: () => setKeyringPassword(),
+                ),
+              ),
+            ],
+          ),
         ),
         SettingsContainer(
           title: "backup-folder".tr(),

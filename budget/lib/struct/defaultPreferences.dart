@@ -25,6 +25,8 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "use24HourFormat": "system", //system, 12-hour, 24-hour
     "numberCountUpAnimation": true,
     "privacyMode": false,
+    "encryptBackups": false,
+    "backupPasswordMode": "keyring",
     "appAnimations": AppAnimations.all.index,
     "showFAQAndHelpLink": true,
     "showExtraInfoText": true,

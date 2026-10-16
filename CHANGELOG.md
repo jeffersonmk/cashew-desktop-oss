@@ -21,6 +21,11 @@ How to use:
   while adding or editing a transaction.
 - "Clean Unused Attachments" in Backups: finds attachment files no
   transaction uses anymore and, after confirming, moves them to the trash.
+- Encrypted backups (optional, in Backups): AES-256-GCM with a password
+  (Argon2id). The password is either saved in the system keyring (GNOME
+  Keyring/KWallet), so automatic backups keep working, or asked every time.
+  Encrypted backups (`.enc`) can also be opened without the app with
+  `tools/decrypt-backup.py`.
 
 ## [1.0.6] - 2026-10-16
 

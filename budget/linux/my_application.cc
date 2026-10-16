@@ -533,6 +533,81 @@ static const gchar* map_string(FlValue* args, const gchar* key) {
 }
 
 // Cashew Desktop: "cashew/window" channel between Dart and the native side.
+// ---------------------------------------------------------------------------
+// Backup password in the system keyring (Secret Service: GNOME Keyring,
+// KWallet, KeePassXC...). libsecret is loaded at runtime so the app still runs
+// without it; the "keyring" option is then reported as unavailable.
+typedef gboolean (*SecretStoreFn)(const void* schema, GHashTable* attributes,
+                                  const gchar* collection, const gchar* label,
+                                  const gchar* password, GCancellable* cancel,
+                                  GError** error);
+typedef gchar* (*SecretLookupFn)(const void* schema, GHashTable* attributes,
+                                 GCancellable* cancel, GError** error);
+typedef gboolean (*SecretClearFn)(const void* schema, GHashTable* attributes,
+                                  GCancellable* cancel, GError** error);
+typedef void (*SecretFreeFn)(gchar* password);
+
+static struct {
+  gboolean tried;
+  SecretStoreFn store;
+  SecretLookupFn lookup;
+  SecretClearFn clear;
+  SecretFreeFn free_password;
+} secret_lib = {};
+
+static gboolean load_libsecret() {
+  if (secret_lib.tried) return secret_lib.store != nullptr;
+  secret_lib.tried = TRUE;
+  void* handle = dlopen("libsecret-1.so.0", RTLD_NOW | RTLD_LOCAL);
+  if (handle == nullptr) return FALSE;
+  secret_lib.store = (SecretStoreFn)dlsym(handle, "secret_password_storev_sync");
+  secret_lib.lookup =
+      (SecretLookupFn)dlsym(handle, "secret_password_lookupv_sync");
+  secret_lib.clear = (SecretClearFn)dlsym(handle, "secret_password_clearv_sync");
+  secret_lib.free_password =
+      (SecretFreeFn)dlsym(handle, "secret_password_free");
+  if (secret_lib.store == nullptr || secret_lib.lookup == nullptr ||
+      secret_lib.clear == nullptr) {
+    secret_lib.store = nullptr;
+    return FALSE;
+  }
+  return TRUE;
+}
+
+static GHashTable* secret_attributes() {
+  GHashTable* attributes = g_hash_table_new(g_str_hash, g_str_equal);
+  g_hash_table_insert(attributes, (gpointer) "application",
+                      (gpointer)APPLICATION_ID);
+  g_hash_table_insert(attributes, (gpointer) "purpose",
+                      (gpointer) "backup-password");
+  return attributes;
+}
+
+// Running, or startable on demand (D-Bus activation, e.g. KWallet).
+static gboolean session_bus_name_activatable(const gchar* name) {
+  g_autoptr(GDBusConnection) bus =
+      g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
+  if (bus == nullptr) return FALSE;
+  g_autoptr(GVariant) result = g_dbus_connection_call_sync(
+      bus, "org.freedesktop.DBus", "/org/freedesktop/DBus",
+      "org.freedesktop.DBus", "ListActivatableNames", nullptr,
+      G_VARIANT_TYPE("(as)"), G_DBUS_CALL_FLAGS_NONE, 1000, nullptr, nullptr);
+  if (result == nullptr) return FALSE;
+  g_autoptr(GVariantIter) iter = nullptr;
+  g_variant_get(result, "(as)", &iter);
+  const gchar* item;
+  while (g_variant_iter_next(iter, "&s", &item)) {
+    if (g_strcmp0(item, name) == 0) return TRUE;
+  }
+  return FALSE;
+}
+
+static gboolean keyring_available() {
+  return load_libsecret() &&
+         (session_bus_name_has_owner("org.freedesktop.secrets") ||
+          session_bus_name_activatable("org.freedesktop.secrets"));
+}
+
 static void window_method_call_cb(FlMethodChannel* channel,
                                   FlMethodCall* method_call,
                                   gpointer user_data) {
@@ -631,6 +706,50 @@ static void window_method_call_cb(FlMethodChannel* channel,
       self->label_notification_open = g_strdup(notification_open);
     }
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  } else if (g_strcmp0(method, "secretAvailable") == 0) {
+    response = FL_METHOD_RESPONSE(
+        fl_method_success_response_new(fl_value_new_bool(keyring_available())));
+  } else if (g_strcmp0(method, "secretStore") == 0 ||
+             g_strcmp0(method, "secretLookup") == 0 ||
+             g_strcmp0(method, "secretClear") == 0) {
+    if (!keyring_available()) {
+      response = FL_METHOD_RESPONSE(fl_method_error_response_new(
+          "unavailable", "No system keyring (Secret Service) found", nullptr));
+    } else {
+      g_autoptr(GHashTable) attributes = secret_attributes();
+      g_autoptr(GError) error = nullptr;
+      g_autoptr(FlValue) result = nullptr;
+      if (g_strcmp0(method, "secretStore") == 0) {
+        const gchar* password =
+            args != nullptr && fl_value_get_type(args) == FL_VALUE_TYPE_STRING
+                ? fl_value_get_string(args)
+                : nullptr;
+        gboolean ok = password != nullptr &&
+                      secret_lib.store(nullptr, attributes, "default",
+                                       "Cashew Desktop backup password",
+                                       password, nullptr, &error);
+        result = fl_value_new_bool(ok);
+      } else if (g_strcmp0(method, "secretLookup") == 0) {
+        gchar* password = secret_lib.lookup(nullptr, attributes, nullptr, &error);
+        result = password != nullptr ? fl_value_new_string(password)
+                                     : fl_value_new_null();
+        if (password != nullptr) {
+          if (secret_lib.free_password != nullptr)
+            secret_lib.free_password(password);
+          else
+            g_free(password);
+        }
+      } else {
+        secret_lib.clear(nullptr, attributes, nullptr, &error);
+        result = fl_value_new_bool(TRUE);
+      }
+      if (error != nullptr) {
+        response = FL_METHOD_RESPONSE(
+            fl_method_error_response_new("keyring", error->message, nullptr));
+      } else {
+        response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+      }
+    }
   } else if (g_strcmp0(method, "showWindow") == 0) {
     show_main_window(self);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));

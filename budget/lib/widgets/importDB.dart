@@ -1,3 +1,4 @@
+import 'package:budget/struct/backupEncryption.dart';
 import 'package:budget/struct/fullBackup.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
@@ -29,7 +30,8 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
   String fileName = result.files.single.name;
   if (fileName.endsWith('.sql') == false &&
       fileName.endsWith('.sqlite') == false &&
-      fileName.endsWith('.zip') == false) {
+      fileName.endsWith('.zip') == false &&
+      isEncryptedBackup(fileName) == false) {
     openSnackbar(SnackbarMessage(
       title: "import-warning".tr(),
       description: "import-warning-description".tr(),
@@ -45,7 +47,13 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
     await overwriteDefaultDB(fileBytes);
   } else {
     File file = File(result.files.single.path ?? "");
-    if (isZipBackup(file.path)) {
+    if (isEncryptedBackup(file.path)) {
+      // Cashew Desktop: encrypted backup; asks for the password if needed.
+      Uint8List? decrypted = await decryptBackupFileInteractive(context, file);
+      if (decrypted == null) return null;
+      ZipBackupContents contents = await readZipBackupBytes(decrypted);
+      await overwriteDefaultDB(contents.databaseBytes);
+    } else if (isZipBackup(file.path)) {
       // Cashew Desktop: full backup with attachments.
       ZipBackupContents contents = await readZipBackup(file.path);
       await overwriteDefaultDB(contents.databaseBytes);

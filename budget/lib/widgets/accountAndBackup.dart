@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:budget/struct/backupEncryption.dart';
 // Cashew Desktop OSS: local-only backups.
 //
 // The original file handled Google Sign-In, Google Drive backups and
@@ -116,14 +118,36 @@ Future<List<File>> getLocalBackups() async {
           p.basename(file.path).startsWith(localBackupFilePrefix) &&
           (file.path.endsWith(".sqlite") ||
               file.path.endsWith(".sql") ||
-              file.path.endsWith(".zip")))
+              file.path.endsWith(".zip") ||
+              isEncryptedBackup(file.path)))
       .toList();
   files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
   return files;
 }
 
-Future<File?> createLocalBackup({bool silent = false}) async {
+// [context]: where to ask for the backup password when encryption is on and
+// it is not saved in the keyring. Without one (automatic backups) an
+// encrypted backup that needs a typed password is skipped.
+Future<File?> createLocalBackup(
+    {bool silent = false, BuildContext? context}) async {
   if (kIsWeb) return null;
+  String? password;
+  if (backupEncryptionEnabled) {
+    password = await passwordForNewBackup(context);
+    if (password == null) {
+      print("Encrypted backup skipped: no password");
+      if (context != null || !silent) {
+        openSnackbar(SnackbarMessage(
+          title: "backup-not-created".tr(),
+          description: "backup-password-missing".tr(),
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.lock_outlined
+              : Icons.lock_rounded,
+        ));
+      }
+      return null;
+    }
+  }
   try {
     if (!silent) loadingIndeterminateKey.currentState?.setVisibility(true);
     await backupSettings();
@@ -135,7 +159,17 @@ Future<File?> createLocalBackup({bool silent = false}) async {
     List<File> attachments = await listAttachmentFiles();
     String baseName = "$localBackupFilePrefix$timestamp-v$schemaVersionGlobal";
     File backupFile;
-    if (attachments.isNotEmpty) {
+    if (password != null) {
+      // Cashew Desktop: encrypted backup (zip, then AES-256-GCM).
+      backupFile =
+          File(p.join(directory.path, baseName + encryptedBackupExtension));
+      Uint8List encrypted = await encryptBackupBytes(
+          buildZipBackupBytes(currentDBFileInfo.dbFileBytes, attachments),
+          password);
+      File partial = File(backupFile.path + ".part");
+      await partial.writeAsBytes(encrypted, flush: true);
+      await partial.rename(backupFile.path);
+    } else if (attachments.isNotEmpty) {
       backupFile = File(p.join(directory.path, baseName + ".zip"));
       await writeZipBackup(
           backupFile.path, currentDBFileInfo.dbFileBytes, attachments);
@@ -214,8 +248,27 @@ Future<void> restoreLocalBackup(BuildContext context, File file) async {
     onCancelLabel: "cancel".tr(),
   );
   if (result != true) return;
+  Uint8List? decrypted;
+  if (isEncryptedBackup(file.path)) {
+    try {
+      decrypted = await decryptBackupFileInteractive(context, file);
+    } catch (e) {
+      openSnackbar(SnackbarMessage(
+        title: "error-importing".tr(),
+        description: e.toString(),
+        icon: appStateSettings["outlinedIcons"]
+            ? Icons.error_outlined
+            : Icons.error_rounded,
+      ));
+      return;
+    }
+    if (decrypted == null) return;
+  }
   await openLoadingPopupTryCatch(() async {
-    if (isZipBackup(file.path)) {
+    if (decrypted != null) {
+      ZipBackupContents contents = await readZipBackupBytes(decrypted);
+      await overwriteDefaultDB(contents.databaseBytes);
+    } else if (isZipBackup(file.path)) {
       ZipBackupContents contents = await readZipBackup(file.path);
       await overwriteDefaultDB(contents.databaseBytes);
     } else {

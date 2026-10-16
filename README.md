@@ -71,6 +71,31 @@ or **drag and drop** files onto the window. The file is copied into the
 attachments folder; your original file is not touched. Click the attachment,
 or the paperclip in the transaction list, to open it with your default app.
 Removing an attachment from a transaction does not delete the file.
+**Backups → Clean Unused Attachments** moves files no transaction uses
+anymore to the trash.
+
+## Encrypted backups
+
+In **Backups**, turn on **Encrypt Backups** to protect backup files with a
+password (AES-256-GCM, key derived with Argon2id). Choose where the password
+lives:
+
+- **Saved in the system keyring** (GNOME Keyring / KWallet): automatic
+  backups keep working; the password is only typed to restore on another
+  computer.
+- **Ask every time**: typed for every backup and restore; automatic backups
+  are skipped.
+
+Encrypted backups end in `.enc`. **Without the password they cannot be
+restored**, so write it down somewhere safe. To open one without the app:
+
+```bash
+uv run --with argon2-cffi --with cryptography tools/decrypt-backup.py BACKUP.enc
+```
+
+This gives the normal backup `.zip` (`db.sqlite` + `attachments/`). Only the
+backup files are encrypted, not the app data on your disk (use disk
+encryption for that).
 
 ## Desktop integration
 

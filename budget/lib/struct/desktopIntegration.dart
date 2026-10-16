@@ -13,6 +13,9 @@
 // The native side lives in linux/my_application.cc ("cashew/window" channel).
 
 import 'package:budget/struct/localAttachments.dart';
+import 'package:budget/struct/backupEncryption.dart';
+import 'package:budget/widgets/navigationFramework.dart' show navigatorKey;
+import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:budget/widgets/accountAndBackup.dart';
 import 'dart:async';
 import 'dart:io';
@@ -96,7 +99,14 @@ Future<void> _onTrayAction(String? action) async {
   } else if (action == "privacy") {
     await togglePrivacyMode();
   } else if (action == "backup") {
-    File? backup = await createLocalBackup(silent: true);
+    BuildContext? context;
+    // "Ask every time": the password has to be typed in the window.
+    if (backupEncryptionEnabled && !backupPasswordInKeyring) {
+      await desktopChannel.invokeMethod("showWindow");
+      context = navigatorKey.currentContext;
+    }
+    File? backup = await createLocalBackup(silent: true, context: context);
+    if (backup == null && context != null) return;
     await showDesktopNotification(
       title: backup != null ? "backup-created".tr() : "error-saving".tr(),
       body: backup?.path ?? "",
