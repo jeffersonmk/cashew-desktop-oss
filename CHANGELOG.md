@@ -17,6 +17,10 @@ How to use:
 ## [1.0.6] - 2026-10-16
 
 ### Added
+- Install from source (`install.sh`): at the end it offers to delete the
+  downloaded source folder (or use `--remove-source` / `--keep-source`). It
+  is never deleted if it has changes or commits not on GitHub. The new
+  `cashew-desktop-uninstall` command removes the app without the source.
 - **Flatpak**: each release now also has a `.flatpak` file. It uses the same
   data folder and keyring entry as the AppImage. See README for install,
   update and uninstall.

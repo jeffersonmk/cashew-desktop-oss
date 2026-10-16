@@ -228,11 +228,29 @@ The script builds a release version and installs it for your user only
 (no `sudo`). Afterwards, open **Cashew Desktop** from your app menu or run
 `cashew-desktop`.
 
-To uninstall (your data is kept):
+At the end it asks whether to **delete the downloaded source folder**
+(`cashew-desktop-oss`, a few hundred MB), which the installed app does not
+need. To choose up front instead of answering the question:
 
 ```bash
-./linux/packaging/install.sh --uninstall
+./linux/packaging/install.sh --remove-source   # install, then delete the source folder
+./linux/packaging/install.sh --keep-source     # install and keep it
 ```
+
+The folder is only deleted when it holds nothing of yours: if you changed or
+added files, or made commits that are not on GitHub, it is kept.
+
+**Update:** run the same steps again (`git clone` ... `install.sh`). If you
+kept the source folder, `git pull` inside it and run `install.sh` again.
+
+**Uninstall** (your data is kept), works even after the source folder was
+deleted:
+
+```bash
+cashew-desktop-uninstall --uninstall
+```
+
+(or `./linux/packaging/install.sh --uninstall` from the source folder).
 
 ## Development
 
