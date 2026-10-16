@@ -7,6 +7,7 @@
 // the desktop trash (gio trash) so a mistake can be undone. Only if there is
 // no trash are they deleted.
 
+import 'package:budget/widgets/accountAndBackup.dart' show restrictToOwner;
 import 'dart:io';
 
 import 'package:budget/functions.dart';
@@ -66,13 +67,43 @@ Future<bool> _moveToTrash(File file) async {
   }
 }
 
-// Returns how many files were removed.
-Future<int> removeAttachmentFiles(List<File> files) async {
-  int removed = 0;
+// Where files go when the system trash can't be used (e.g. a Flatpak whose
+// trash portal fails): a folder next to attachments/, so nothing is lost.
+const String removedAttachmentsFolderName = "removed-attachments";
+
+Future<void> _moveToRemovedFolder(File file) async {
+  Directory folder = Directory(
+      p.join(p.dirname(p.dirname(file.path)), removedAttachmentsFolderName));
+  if (!await folder.exists()) {
+    await folder.create(recursive: true);
+    await restrictToOwner(folder.path);
+  }
+  String target = p.join(folder.path, p.basename(file.path));
+  int n = 1;
+  while (await File(target).exists()) {
+    target = p.join(folder.path,
+        p.basenameWithoutExtension(file.path) + "-$n" + p.extension(file.path));
+    n++;
+  }
+  await file.rename(target);
+}
+
+class RemovedAttachments {
+  int toTrash = 0;
+  int toFolder = 0;
+  int get total => toTrash + toFolder;
+}
+
+Future<RemovedAttachments> removeAttachmentFiles(List<File> files) async {
+  RemovedAttachments removed = RemovedAttachments();
   for (File file in files) {
     try {
-      if (!await _moveToTrash(file)) await file.delete();
-      removed++;
+      if (await _moveToTrash(file)) {
+        removed.toTrash++;
+      } else {
+        await _moveToRemovedFolder(file);
+        removed.toFolder++;
+      }
     } catch (e) {
       print("Could not remove attachment " + file.path + ": " + e.toString());
     }
@@ -109,10 +140,15 @@ Future<void> openUnusedAttachmentsCleanup(BuildContext context) async {
     onSubmitLabel: "remove".tr(),
     onSubmit: () async {
       popRoute(context);
-      int removed = await removeAttachmentFiles(unused);
+      RemovedAttachments removed = await removeAttachmentFiles(unused);
       openSnackbar(SnackbarMessage(
-        title: "unused-attachments-removed"
-            .tr(namedArgs: {"count": removed.toString()}),
+        title: removed.toFolder == 0
+            ? "unused-attachments-removed"
+                .tr(namedArgs: {"count": removed.total.toString()})
+            : "unused-attachments-moved-to-folder".tr(namedArgs: {
+                "count": removed.total.toString(),
+                "folder": removedAttachmentsFolderName,
+              }),
         icon: icon,
       ));
     },

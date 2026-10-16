@@ -1,0 +1,59 @@
+# Cashew Desktop as a Flatpak.
+#
+# Packs an already built release bundle (build/linux/x64/release/bundle): the
+# GitHub workflow builds it on Ubuntu 22.04, then runs build-flatpak.sh.
+# Locally:  ./linux/packaging/flatpak/build-flatpak.sh
+app-id: io.github.jeffersonmk.CashewDesktop
+runtime: org.gnome.Platform
+runtime-version: "50"
+sdk: org.gnome.Sdk
+command: cashew-desktop
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # Exchange rates.
+  - --share=network
+  # Data: same folder as the AppImage (see cashew-desktop.sh).
+  - --filesystem=xdg-data/io.github.jeffersonmk.CashewDesktop:create
+  # "Start with the system" writes its entry here.
+  - --filesystem=xdg-config/autostart:create
+  # Exported files (CSV, backups) are saved to Downloads.
+  - --filesystem=xdg-download
+  # Tray icon.
+  - --talk-name=org.kde.StatusNotifierWatcher
+  # Desktop notifications.
+  - --talk-name=org.freedesktop.Notifications
+  # Backup password in the system keyring (same entry as the AppImage).
+  - --talk-name=org.freedesktop.secrets
+  - --env=SECRET_BACKEND=service
+modules:
+  - shared-modules/libayatana-appindicator/libayatana-appindicator-gtk3.json
+
+  - name: cashew-desktop
+    buildsystem: simple
+    sources:
+      - type: dir
+        path: ../../../build/linux/x64/release/bundle
+        dest: bundle
+      - type: file
+        path: cashew-desktop.sh
+      - type: dir
+        path: ../icons
+        dest: icons
+      - type: file
+        path: ../io.github.jeffersonmk.CashewDesktop.desktop
+      - type: file
+        path: ../io.github.jeffersonmk.CashewDesktop.metainfo.xml
+    build-commands:
+      - mkdir -p /app/cashew
+      - cp -r bundle/. /app/cashew/
+      - install -Dm755 cashew-desktop.sh /app/bin/cashew-desktop
+      - install -Dm644 io.github.jeffersonmk.CashewDesktop.desktop -t /app/share/applications
+      - install -Dm644 io.github.jeffersonmk.CashewDesktop.metainfo.xml -t /app/share/metainfo
+      - |
+        for size in 16 24 32 48 64 128 256 512; do
+          install -Dm644 icons/$size.png \
+            /app/share/icons/hicolor/${size}x${size}/apps/io.github.jeffersonmk.CashewDesktop.png
+        done

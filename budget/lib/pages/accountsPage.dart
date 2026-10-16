@@ -1,3 +1,4 @@
+import 'package:budget/struct/filePickerCompat.dart';
 import 'package:budget/struct/restoreBackup.dart' show beforeRestoreFile;
 import 'package:budget/struct/localAttachments.dart';
 import 'package:budget/struct/attachmentCleanup.dart';
@@ -173,7 +174,7 @@ class AccountsPageState extends State<AccountsPage> {
   }
 
   Future<void> chooseBackupFolder() async {
-    String? selected = await FilePicker.platform.getDirectoryPath();
+    String? selected = await getDirectoryPathCompat();
     if (selected == null) return;
     await updateSettings("localBackupFolder", selected,
         pagesNeedingRefresh: [], updateGlobalState: false);

@@ -1284,5 +1284,6 @@
   "undo-restore-description": "Go back to the data in use before the restore of {date}",
   "undo-restore-warning": "The data from before the last restore comes back. The current data is kept, so this can be undone too.",
   "undo-restore-confirm": "Undo",
-  "not-a-cashew-backup": "This file is not a Cashew backup. Nothing was changed."
+  "not-a-cashew-backup": "This file is not a Cashew backup. Nothing was changed.",
+  "unused-attachments-moved-to-folder": "{count} attachments moved to the \"{folder}\" folder (in the data folder)"
 }

@@ -37,6 +37,10 @@ const String _appId = "io.github.jeffersonmk.CashewDesktop";
 
 bool get isLinuxDesktop => !kIsWeb && Platform.isLinux;
 
+// Running as a Flatpak (the sandbox sets FLATPAK_ID).
+bool get isFlatpak =>
+    isLinuxDesktop && (Platform.environment["FLATPAK_ID"] ?? "") != "";
+
 class DesktopCapabilities {
   bool tray = false;
   bool notifications = false;
@@ -174,7 +178,10 @@ Future<bool> applyCloseToTray() async {
 // ---------------------------------------------------------------------------
 
 String _autostartFilePath() {
-  String configHome = Platform.environment["XDG_CONFIG_HOME"] ?? "";
+  // A Flatpak gets its own XDG_CONFIG_HOME; autostart entries belong in the
+  // real ~/.config/autostart (the manifest gives access to that folder).
+  String configHome =
+      isFlatpak ? "" : (Platform.environment["XDG_CONFIG_HOME"] ?? "");
   if (configHome.trim() == "") {
     configHome = (Platform.environment["HOME"] ?? "") + "/.config";
   }
@@ -215,7 +222,11 @@ Future<bool> setStartWithSystem(bool enabled) async {
         "Type=Application",
         "Name=Cashew Desktop",
         "Comment=Start Cashew Desktop minimized to the tray",
-        "Exec=" + _desktopExecQuote(_executablePath()) + " --minimized",
+        "Exec=" +
+            (isFlatpak
+                ? "flatpak run " + _appId
+                : _desktopExecQuote(_executablePath())) +
+            " --minimized",
         "Icon=" + _appId,
         "Terminal=false",
         "X-GNOME-Autostart-enabled=true",

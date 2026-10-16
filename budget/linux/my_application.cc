@@ -341,14 +341,24 @@ static void on_tray_privacy(GtkMenuItem* item, gpointer user_data) {
   tray_action(MY_APPLICATION(user_data), "privacy");
 }
 
+// Flatpak: files under /app are not visible to the tray or the notification
+// daemon, which run outside the sandbox. They use the icon Flatpak exports
+// under the app id instead.
+static gboolean in_flatpak() {
+  const gchar* id = g_getenv("FLATPAK_ID");
+  return id != nullptr && id[0] != '\0';
+}
+
 static void enable_tray(MyApplication* self) {
   if (self->indicator != nullptr || !tray_available()) return;
   // The icon is looked up by name in the bundle's data/ folder.
-  g_autofree gchar* icon_path = bundle_data_file("app_icon.png");
+  g_autofree gchar* icon_path =
+      in_flatpak() ? nullptr : bundle_data_file("app_icon.png");
   g_autofree gchar* icon_dir =
       icon_path != nullptr ? g_path_get_dirname(icon_path) : nullptr;
   self->indicator = appindicator.new_indicator(
-      APPLICATION_ID, "app_icon", kIndicatorCategoryApplicationStatus);
+      APPLICATION_ID, in_flatpak() ? APPLICATION_ID : "app_icon",
+      kIndicatorCategoryApplicationStatus);
   if (self->indicator == nullptr) return;
   if (appindicator.set_icon_theme_path != nullptr && icon_dir != nullptr) {
     appindicator.set_icon_theme_path(self->indicator, icon_dir);
@@ -469,8 +479,10 @@ static guint32 show_notification(MyApplication* self, const gchar* title,
 
   g_autofree gchar* icon_path = bundle_data_file("app_icon.png");
   g_autofree gchar* icon_uri =
-      icon_path != nullptr ? g_filename_to_uri(icon_path, nullptr, nullptr)
-                           : nullptr;
+      in_flatpak() ? g_strdup(APPLICATION_ID)
+      : icon_path != nullptr
+          ? g_filename_to_uri(icon_path, nullptr, nullptr)
+          : nullptr;
 
   GVariantBuilder actions;
   g_variant_builder_init(&actions, G_VARIANT_TYPE("as"));
@@ -609,6 +621,26 @@ static gboolean keyring_available() {
           session_bus_name_activatable("org.freedesktop.secrets"));
 }
 
+// Answers a "pickPath" call: the chosen path, or null when cancelled.
+static void pick_path_response_cb(GtkNativeDialog* dialog, gint response_id,
+                                  gpointer user_data) {
+  FlMethodCall* method_call = FL_METHOD_CALL(
+      g_object_get_data(G_OBJECT(dialog), "method-call"));
+  g_autoptr(FlValue) result = fl_value_new_null();
+  if (response_id == GTK_RESPONSE_ACCEPT) {
+    g_autofree gchar* path =
+        gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    if (path != nullptr) {
+      fl_value_unref(result);
+      result = fl_value_new_string(path);
+    }
+  }
+  g_autoptr(FlMethodResponse) response =
+      FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+  fl_method_call_respond(method_call, response, nullptr);
+  g_object_unref(dialog);
+}
+
 static void window_method_call_cb(FlMethodChannel* channel,
                                   FlMethodCall* method_call,
                                   gpointer user_data) {
@@ -626,7 +658,25 @@ static void window_method_call_cb(FlMethodChannel* channel,
                                 ? g_strdup(appimage)
                                 : g_file_read_link("/proc/self/exe", nullptr);
     gboolean started = FALSE;
-    if (exe != nullptr) {
+    const gchar* flatpak_id = g_getenv("FLATPAK_ID");
+    if (flatpak_id != nullptr && flatpak_id[0] != '\0') {
+      // Flatpak: everything in the sandbox ends with this process, so the
+      // new instance is started in a new sandbox (flatpak-spawn, Flatpak
+      // portal). It waits until this one has left the session bus.
+      const gchar* argv[] = {
+          "flatpak-spawn", "/bin/sh", "-c",
+          "i=0; while [ $i -lt 150 ] && gdbus call --session --dest "
+          "org.freedesktop.DBus --object-path /org/freedesktop/DBus --method "
+          "org.freedesktop.DBus.NameHasOwner \"$1\" 2>/dev/null | "
+          "grep -q true; do sleep 0.1; i=$((i+1)); done; "
+          "exec /app/bin/cashew-desktop",
+          "cashew-restart", flatpak_id, nullptr};
+      g_autoptr(GError) error = nullptr;
+      started = g_spawn_async(nullptr, (gchar**)argv, nullptr,
+                              G_SPAWN_SEARCH_PATH, nullptr, nullptr, nullptr,
+                              &error);
+      if (!started) g_warning("Restart failed: %s", error->message);
+    } else if (exe != nullptr) {
       g_autofree gchar* pid = g_strdup_printf("%d", (int)getpid());
       const gchar* argv[] = {
           "/bin/sh", "-c",
@@ -643,6 +693,30 @@ static void window_method_call_cb(FlMethodChannel* channel,
         fl_method_success_response_new(fl_value_new_bool(started)));
     fl_method_call_respond(method_call, response, nullptr);
     if (started) quit_app(self);
+    return;
+  } else if (g_strcmp0(method, "pickPath") == 0) {
+    // Cashew Desktop: native file chooser. In a Flatpak it goes through the
+    // file chooser portal (the zenity dialogs of file_picker are not there).
+    const gchar* title = map_string(args, "title");
+    FlValue* directory_value =
+        fl_value_get_type(args) == FL_VALUE_TYPE_MAP
+            ? fl_value_lookup_string(args, "directory")
+            : nullptr;
+    gboolean directory =
+        directory_value != nullptr &&
+        fl_value_get_type(directory_value) == FL_VALUE_TYPE_BOOL &&
+        fl_value_get_bool(directory_value);
+    GtkFileChooserNative* chooser = gtk_file_chooser_native_new(
+        title != nullptr ? title : "", self->window,
+        directory ? GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
+                  : GTK_FILE_CHOOSER_ACTION_OPEN,
+        nullptr, nullptr);
+    gtk_native_dialog_set_modal(GTK_NATIVE_DIALOG(chooser), TRUE);
+    g_object_set_data_full(G_OBJECT(chooser), "method-call",
+                           g_object_ref(method_call), g_object_unref);
+    g_signal_connect(chooser, "response", G_CALLBACK(pick_path_response_cb),
+                     nullptr);
+    gtk_native_dialog_show(GTK_NATIVE_DIALOG(chooser));
     return;
   } else if (g_strcmp0(method, "quit") == 0) {
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));

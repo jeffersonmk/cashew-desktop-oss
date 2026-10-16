@@ -101,25 +101,28 @@ class _DesktopIntegrationSettingsState
             return true;
           },
         ),
-        SettingsContainerSwitch(
-          title: "check-for-updates".tr(),
-          description: "check-for-updates-description".tr(),
-          initialValue: appStateSettings["desktopCheckForUpdates"] == true,
-          icon: outlined
-              ? Icons.system_update_outlined
-              : Icons.system_update_rounded,
-          onSwitched: (value) async {
-            await updateSettings("desktopCheckForUpdates", value,
-                updateGlobalState: false);
-            return true;
-          },
-        ),
-        SettingsContainer(
-          title: "check-for-updates-now".tr(),
-          description: "v" + currentAppVersion,
-          icon: outlined ? Icons.refresh_outlined : Icons.refresh_rounded,
-          onTap: () => checkForUpdatesNow(),
-        ),
+        // Flatpak: updates come from Flatpak itself (flatpak update).
+        if (!isFlatpak)
+          SettingsContainerSwitch(
+            title: "check-for-updates".tr(),
+            description: "check-for-updates-description".tr(),
+            initialValue: appStateSettings["desktopCheckForUpdates"] == true,
+            icon: outlined
+                ? Icons.system_update_outlined
+                : Icons.system_update_rounded,
+            onSwitched: (value) async {
+              await updateSettings("desktopCheckForUpdates", value,
+                  updateGlobalState: false);
+              return true;
+            },
+          ),
+        if (!isFlatpak)
+          SettingsContainer(
+            title: "check-for-updates-now".tr(),
+            description: "v" + currentAppVersion,
+            icon: outlined ? Icons.refresh_outlined : Icons.refresh_rounded,
+            onTap: () => checkForUpdatesNow(),
+          ),
       ],
     );
   }

@@ -1,3 +1,4 @@
+import 'package:budget/struct/desktopIntegration.dart' show isFlatpak;
 // Cashew Desktop: check GitHub for a newer release.
 //
 // Once a day (and when the user asks) the app reads the latest release of the
@@ -93,6 +94,8 @@ void _showUpdateAvailable(ReleaseInfo release) {
 
 // Automatic check on startup: at most once a day, silent on errors.
 Future<void> checkForUpdatesAutomatically() async {
+  // Flatpak: updates come from Flatpak itself.
+  if (isFlatpak) return;
   if (kIsWeb || !isDesktopPlatform) return;
   if (appStateSettings["desktopCheckForUpdates"] != true) return;
   DateTime now = DateTime.now();

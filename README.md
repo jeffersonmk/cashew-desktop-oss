@@ -170,6 +170,45 @@ chmod +x Cashew_Desktop-*-x86_64.AppImage
 If it does not start, install FUSE 2 (`libfuse2` on Debian/Ubuntu,
 `fuse2` on Arch/Fedora) or run it with `--appimage-extract-and-run`.
 
+## Download (Flatpak)
+
+Get the latest `Cashew_Desktop-*-x86_64.flatpak` from the
+[Releases page](https://github.com/jeffersonmk/cashew-desktop-oss/releases).
+
+**Install** (the first time it also downloads the GNOME runtime from Flathub,
+a few hundred MB):
+
+```bash
+flatpak install --user Cashew_Desktop-*-x86_64.flatpak
+```
+
+Then open **Cashew Desktop** from your app menu, or run
+`flatpak run io.github.jeffersonmk.CashewDesktop`.
+
+**Update:** download the new `.flatpak` from Releases and run the same
+`flatpak install --user ...` command again. (The app does not check for
+updates in the Flatpak version: the Releases page is the place to look.)
+
+**Uninstall** (your data is kept):
+
+```bash
+flatpak uninstall --user io.github.jeffersonmk.CashewDesktop
+```
+
+The Flatpak uses the **same data folder as the AppImage**
+(`~/.local/share/io.github.jeffersonmk.CashewDesktop`) and the same keyring
+entry for the backup password, so you can switch between them without moving
+anything. Don't run both at the same time.
+
+What the Flatpak is allowed to access: its data folder, `~/Downloads`
+(exports), `~/.config/autostart` (start with the system), the network
+(exchange rates), the tray, notifications and the keyring. Other files only
+when you pick them in a file dialog. A custom backup folder chosen in an
+older version must be chosen again in the Flatpak (it is then shown with an
+internal path like `/run/user/1000/doc/...`; the files still go to the folder
+you picked). "Clean Unused Attachments" moves files to a `removed-attachments`
+folder inside the data folder when the system trash can't be used.
+
 ## Install on Linux (from source)
 
 Requirements:
@@ -217,7 +256,7 @@ Debug builds print the app logs to the terminal.
 - [x] Local backups
 - [x] Native Linux build, icon and menu entry
 - [x] AppImage
-- [ ] Flatpak
+- [x] Flatpak (`.flatpak` file on the Releases page)
 - [x] Keyboard shortcuts and remembered window size
 - [x] Right-click menu on transactions
 - [x] Desktop notifications, tray icon and start with the system

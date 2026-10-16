@@ -10,6 +10,7 @@
 // if the data folder moves. The name is checked before use so a crafted note
 // can never point outside the attachments folder.
 
+import 'package:budget/struct/filePickerCompat.dart';
 import 'dart:io';
 
 import 'package:budget/functions.dart';
@@ -121,7 +122,7 @@ Future<String> copyFileToAttachments(File source) async {
 // Lets the user pick a file and copies it. Null if cancelled or on error.
 Future<String?> pickAndAttachFile() async {
   try {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await pickFilesCompat(
       dialogTitle: "add-attachment".tr(),
       allowMultiple: false,
     );

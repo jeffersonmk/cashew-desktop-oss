@@ -1,3 +1,4 @@
+import 'package:budget/struct/filePickerCompat.dart';
 import 'package:budget/struct/restoreBackup.dart';
 import 'package:budget/widgets/accountAndBackup.dart' show openBackupRestoredPopup;
 import 'package:budget/struct/backupEncryption.dart';
@@ -19,7 +20,7 @@ import 'dart:io';
 // start, see restoreBackup.dart). Web: the file name.
 Future<Object?> importDBFileFromDevice(BuildContext context) async {
   // Avoid using a file filter: PlatformException(FilePicker, Unsupported filter....
-  FilePickerResult? result = await FilePicker.platform.pickFiles();
+  FilePickerResult? result = await pickFilesCompat();
   if (result == null) {
     openSnackbar(SnackbarMessage(
       title: "error-importing".tr(),

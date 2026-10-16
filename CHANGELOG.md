@@ -14,7 +14,17 @@ How to use:
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-10-16
+
 ### Added
+- **Flatpak**: each release now also has a `.flatpak` file. It uses the same
+  data folder and keyring entry as the AppImage. See README for install,
+  update and uninstall.
+- Restoring a backup: a "Restart Now" button reopens the app by itself, and
+  the window shows what was restored (date, transactions, attachments).
+- "Undo Restore" in Backups brings back the data from before the last restore.
+- Tray icon: left click shows or hides the window; the menu has "Add
+  Transaction" and "Backup Now" (the result is shown as a notification).
 - Privacy mode: hides all amounts (balances, transactions, budgets, graphs)
   behind dots. Toggle it with `Ctrl + H`, the eye button in the side menu or
   the tray menu; it is remembered between runs. Amounts are still shown
@@ -27,15 +37,6 @@ How to use:
   An optional recovery key (shown once, to write down) also opens the
   backups if the password is forgotten. Encrypted backups (`.enc`) can also
   be opened without the app with `tools/decrypt-backup.py`.
-
-## [1.0.6] - 2026-10-16
-
-### Added
-- Restoring a backup: a "Restart Now" button reopens the app by itself, and
-  the window shows what was restored (date, transactions, attachments).
-- "Undo Restore" in Backups brings back the data from before the last restore.
-- Tray icon: left click shows or hides the window; the menu has "Add
-  Transaction" and "Backup Now" (the result is shown as a notification).
 
 ### Changed
 - Built with Flutter 3.47 (was 3.22) and updated dependencies. Rendering now

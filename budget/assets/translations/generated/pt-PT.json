@@ -1284,5 +1284,6 @@
   "undo-restore-description": "Volta aos dados de antes do restauro de {date}",
   "undo-restore-warning": "Os dados de antes do último restauro voltam. Os dados atuais ficam guardados, por isso isto também pode ser desfeito.",
   "undo-restore-confirm": "Desfazer",
-  "not-a-cashew-backup": "Este ficheiro não é uma cópia de segurança do Cashew. Nada foi alterado."
+  "not-a-cashew-backup": "Este ficheiro não é uma cópia de segurança do Cashew. Nada foi alterado.",
+  "unused-attachments-moved-to-folder": "{count} anexos movidos para a pasta \"{folder}\" (na pasta de dados)"
 }

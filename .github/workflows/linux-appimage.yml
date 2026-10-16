@@ -1,4 +1,5 @@
-# Builds the Linux AppImage and attaches it to a GitHub Release.
+# Builds the Linux AppImage and the Flatpak bundle and attaches them to a
+# GitHub Release.
 #
 # How to publish a new version:
 #   1. In CHANGELOG.md rename "## [Unreleased]" to "## [1.0.0] - YYYY-MM-DD"
@@ -6,13 +7,13 @@
 #   2. git tag v1.0.0
 #      git push origin v1.0.0
 # The workflow runs, creates the release "v1.0.0" with the notes from
-# CHANGELOG.md and uploads the AppImage.
+# CHANGELOG.md and uploads the AppImage and the .flatpak.
 #
 # Third-party actions are pinned to exact commits so a hijacked tag can't
 # change what runs here.
 #
 # It can also be started by hand from the Actions tab (workflow_dispatch):
-# that only builds the AppImage and keeps it as a downloadable artifact.
+# that only builds the packages and keeps them as downloadable artifacts.
 
 name: Linux AppImage
 
@@ -31,8 +32,6 @@ jobs:
     # Build on an older Ubuntu so the AppImage runs on most distributions
     # (an AppImage needs a glibc at least as new as the build system's).
     runs-on: ubuntu-22.04
-    permissions:
-      contents: write # needed to create the release
     defaults:
       run:
         working-directory: budget
@@ -68,18 +67,89 @@ jobs:
           VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
         run: ./linux/packaging/build-appimage.sh
 
-      - name: Upload artifact
+      # The same release build is packed as a Flatpak in the next job (a tar
+      # keeps the file permissions).
+      - name: Pack the release bundle
+        run: tar -C build/linux/x64/release -czf build/linux-bundle.tar.gz bundle
+
+      - name: Upload AppImage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: Cashew_Desktop-AppImage
           path: budget/build/appimage/*.AppImage
 
+      - name: Upload release bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: linux-bundle
+          path: budget/build/linux-bundle.tar.gz
+          retention-days: 1
+
+  flatpak:
+    # Official Flathub build container with the GNOME runtime and SDK (the
+    # flatpak-builder of Ubuntu 22.04 is too old for them).
+    needs: appimage
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50
+      options: --privileged
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: linux-bundle
+          path: budget/build
+
+      - name: Unpack the release bundle
+        run: |
+          mkdir -p budget/build/linux/x64/release
+          tar -C budget/build/linux/x64/release -xzf budget/build/linux-bundle.tar.gz
+
+      - name: Bundle name
+        id: name
+        env:
+          VERSION: ${{ github.ref_type == 'tag' && github.ref_name || 'dev' }}
+        run: echo "bundle=Cashew_Desktop-${VERSION#v}-x86_64.flatpak" >> "$GITHUB_OUTPUT"
+
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@79327416609af08178ad73b352877e51450790b3 # v6.8
+        with:
+          manifest-path: budget/linux/packaging/flatpak/io.github.jeffersonmk.CashewDesktop.yml
+          bundle: ${{ steps.name.outputs.bundle }}
+          cache-key: flatpak-builder-${{ github.sha }}
+          upload-artifact: false
+
+      - name: Upload Flatpak
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Cashew_Desktop-Flatpak
+          path: ${{ steps.name.outputs.bundle }}
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: [appimage, flatpak]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed to create the release
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          pattern: Cashew_Desktop-*
+          path: dist
+          merge-multiple: true
+
       # Release notes come from the matching "## [X.Y.Z]" section of
       # CHANGELOG.md. The build fails if that section is missing, so a release
       # is never published without notes.
       - name: Extract release notes from CHANGELOG.md
-        if: github.ref_type == 'tag'
-        working-directory: .
         env:
           TAG: ${{ github.ref_name }}
         run: |
@@ -94,11 +164,13 @@ jobs:
             exit 1
           fi
           cat release-notes.md
+          ls -la dist
 
       - name: Publish GitHub Release
-        if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           name: Cashew Desktop ${{ github.ref_name }}
-          files: budget/build/appimage/*.AppImage
+          files: |
+            dist/*.AppImage
+            dist/*.flatpak
           body_path: release-notes.md

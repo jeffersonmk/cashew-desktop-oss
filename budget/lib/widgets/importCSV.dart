@@ -1,3 +1,4 @@
+import 'package:budget/struct/filePickerCompat.dart';
 import 'dart:convert';
 
 import 'package:budget/colors.dart';
@@ -53,7 +54,7 @@ class _ImportCSVState extends State<ImportCSV> {
 
   Future<String?> _getCSVStringFromBackupFile() async {
     dynamic csvStringOut = await openLoadingPopupTryCatch(() async {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      FilePickerResult? result = await pickFilesCompat(
         allowedExtensions: ['csv'],
         type: FileType.custom,
       );

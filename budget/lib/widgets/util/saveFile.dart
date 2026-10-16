@@ -1,3 +1,4 @@
+import 'package:budget/struct/filePickerCompat.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:budget/functions.dart';
@@ -154,7 +155,7 @@ Future<bool> saveFile({
     print("Error saving file to device: " + e.toString());
     if (customDirectory == null) {
       // Try again with selecting a custom directory
-      String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+      String? selectedDirectory = await getDirectoryPathCompat();
       if (selectedDirectory == null) {
         openSnackbar(SnackbarMessage(
           title: errorMessage.tr(),
