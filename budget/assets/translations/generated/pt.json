@@ -1230,5 +1230,8 @@
   "attachments-added": "{count} anexos adicionados",
   "drop-attachment-here": "Abra uma transação para anexar arquivos",
   "drop-attachment-here-description": "Solte os arquivos na tela de adicionar ou editar transação",
-  "tray-backup-now": "Fazer backup agora"
+  "tray-backup-now": "Fazer backup agora",
+  "hide-amounts": "Ocultar valores",
+  "show-amounts": "Mostrar valores",
+  "privacy-mode": "Ocultar/mostrar valores"
 }

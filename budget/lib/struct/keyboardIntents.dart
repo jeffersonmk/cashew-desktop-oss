@@ -68,6 +68,7 @@ const List<List<String>> shortcutHelpItems = [
   ["budgets", "Ctrl + 3"],
   ["more", "Ctrl + 4"],
   ["backups", "Ctrl + B"],
+  ["privacy-mode", "Ctrl + H"],
   ["shortcut-back-close", "Esc"],
   ["quit-app", "Ctrl + Q"],
   ["shortcut-show-shortcuts", "keyboard-shortcuts-hint"],
@@ -163,6 +164,9 @@ Map<Type, Action<Intent>> keyboardIntents = {
   BackupsIntent: CallbackAction<BackupsIntent>(
     onInvoke: (BackupsIntent intent) => _goToPage(_backupsPage),
   ),
+  PrivacyModeIntent: CallbackAction<PrivacyModeIntent>(
+    onInvoke: (PrivacyModeIntent intent) => togglePrivacyMode(),
+  ),
   QuitIntent: CallbackAction<QuitIntent>(
     onInvoke: (QuitIntent intent) async {
       await quitApp();
@@ -190,6 +194,8 @@ Map<ShortcutActivator, Intent> shortcuts = {
       const SearchIntent(),
   const SingleActivator(LogicalKeyboardKey.keyB, control: true):
       const BackupsIntent(),
+  const SingleActivator(LogicalKeyboardKey.keyH, control: true):
+      const PrivacyModeIntent(),
   const SingleActivator(LogicalKeyboardKey.keyQ, control: true):
       const QuitIntent(),
   const SingleActivator(LogicalKeyboardKey.slash, control: true):
@@ -227,6 +233,10 @@ class SearchIntent extends Intent {
 
 class BackupsIntent extends Intent {
   const BackupsIntent();
+}
+
+class PrivacyModeIntent extends Intent {
+  const PrivacyModeIntent();
 }
 
 class QuitIntent extends Intent {

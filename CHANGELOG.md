@@ -14,6 +14,12 @@ How to use:
 
 ## [Unreleased]
 
+### Added
+- Privacy mode: hides all amounts (balances, transactions, budgets, graphs)
+  behind dots. Toggle it with `Ctrl + H`, the eye button in the side menu or
+  the tray menu; it is remembered between runs. Amounts are still shown
+  while adding or editing a transaction.
+
 ## [1.0.6] - 2026-10-16
 
 ### Added

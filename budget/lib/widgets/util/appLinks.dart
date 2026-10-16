@@ -156,7 +156,7 @@ Future<Transaction?> processAddTransactionFromParams(
               child: TableEntry(
                 padding: const EdgeInsetsDirectional.symmetric(horizontal: 18),
                 firstEntry: [
-                  convertToMoney(
+                  convertToMoney(ignorePrivacy: true, 
                       Provider.of<AllWallets>(context, listen: false), amount,
                       currencyKey:
                           Provider.of<AllWallets>(context, listen: false)

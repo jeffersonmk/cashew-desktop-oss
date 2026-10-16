@@ -283,12 +283,12 @@ class _BillSplitterState extends State<BillSplitter> {
                   totalAccountedFor += amountSpent;
                 }
               }
-              String totalAccountedForString = convertToMoney(
+              String totalAccountedForString = convertToMoney(ignorePrivacy: true, 
                 Provider.of<AllWallets>(context),
                 totalAccountedFor,
                 finalNumber: totalAccountedFor.abs(),
               );
-              String totalCostString = convertToMoney(
+              String totalCostString = convertToMoney(ignorePrivacy: true, 
                 Provider.of<AllWallets>(context),
                 totalCost,
                 finalNumber: totalCost.abs(),
@@ -312,7 +312,7 @@ class _BillSplitterState extends State<BillSplitter> {
                     textBuilder: (number) {
                       return TextFont(
                         textAlign: TextAlign.center,
-                        text: convertToMoney(
+                        text: convertToMoney(ignorePrivacy: true, 
                           Provider.of<AllWallets>(context),
                           number,
                           finalNumber: number.abs(),
@@ -333,7 +333,7 @@ class _BillSplitterState extends State<BillSplitter> {
                         return TextFont(
                           textAlign: TextAlign.center,
                           text: " / " +
-                              convertToMoney(
+                              convertToMoney(ignorePrivacy: true, 
                                 Provider.of<AllWallets>(context),
                                 number,
                                 finalNumber: number.abs(),
@@ -586,11 +586,11 @@ class BillSplitterItemEntry extends StatelessWidget {
           billSplitterItem.cost *
           multiplierAmount;
     }
-    String totalString = convertToMoney(
+    String totalString = convertToMoney(ignorePrivacy: true, 
       Provider.of<AllWallets>(context),
       total,
     );
-    String originalCostString = convertToMoney(
+    String originalCostString = convertToMoney(ignorePrivacy: true, 
       Provider.of<AllWallets>(context),
       billSplitterItem.cost * multiplierAmount,
     );
@@ -676,7 +676,7 @@ class BillSplitterItemEntry extends StatelessWidget {
                                 const EdgeInsetsDirectional.only(bottom: 2),
                             child: TextFont(
                               text: " / " +
-                                  convertToMoney(
+                                  convertToMoney(ignorePrivacy: true, 
                                     Provider.of<AllWallets>(context),
                                     billSplitterItem.cost * multiplierAmount,
                                   ),
@@ -730,7 +730,7 @@ class BillSplitterItemEntry extends StatelessWidget {
                                         ),
                                       ),
                                       TextFont(
-                                        text: convertToMoney(
+                                        text: convertToMoney(ignorePrivacy: true, 
                                           Provider.of<AllWallets>(context),
                                           amountSpent,
                                         ),
@@ -968,7 +968,7 @@ class _AddBillItemPageState extends State<AddBillItemPage> {
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(bottom: 7.5),
                   child: TappableTextEntry(
-                    title: convertToMoney(
+                    title: convertToMoney(ignorePrivacy: true, 
                       Provider.of<AllWallets>(context),
                       billSplitterItem.cost,
                     ),
@@ -1517,13 +1517,13 @@ Future<bool> generateLoanTransactionsFromBillSummary(
 
         note += billSplitterItem.name +
             ": " +
-            convertToMoney(
+            convertToMoney(ignorePrivacy: true, 
               Provider.of<AllWallets>(context, listen: false),
               amountSpent,
             ) +
             (percentOfTotal < 1
                 ? (" / " +
-                    convertToMoney(
+                    convertToMoney(ignorePrivacy: true, 
                       Provider.of<AllWallets>(context, listen: false),
                       billSplitterItem.cost * multiplierAmount,
                     ))
@@ -1641,7 +1641,7 @@ class _SummaryPersonRowEntryState extends State<SummaryPersonRowEntry> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       TextFont(
-                        text: convertToMoney(
+                        text: convertToMoney(ignorePrivacy: true, 
                           Provider.of<AllWallets>(context),
                           widget.total,
                         ),
@@ -1719,7 +1719,7 @@ class _SummaryPersonRowEntryState extends State<SummaryPersonRowEntry> {
                                             ),
                                           ),
                                           TextFont(
-                                            text: convertToMoney(
+                                            text: convertToMoney(ignorePrivacy: true, 
                                               Provider.of<AllWallets>(context),
                                               amountSpent,
                                             ),

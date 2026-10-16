@@ -1634,21 +1634,21 @@ class _BudgetDetailsState extends State<BudgetDetails> {
             children: [
               IntrinsicWidth(
                 child: TappableTextEntry(
-                  title: convertToMoney(
+                  title: convertToMoney(ignorePrivacy: true, 
                     Provider.of<AllWallets>(context),
                     selectedAmount ?? 0,
                     currencyKey: Provider.of<AllWallets>(context, listen: true)
                         .indexedByPk[selectedWalletPk]
                         ?.currency,
                   ),
-                  placeholder: convertToMoney(
+                  placeholder: convertToMoney(ignorePrivacy: true, 
                     Provider.of<AllWallets>(context),
                     0,
                     currencyKey: Provider.of<AllWallets>(context, listen: true)
                         .indexedByPk[selectedWalletPk]
                         ?.currency,
                   ),
-                  showPlaceHolderWhenTextEquals: convertToMoney(
+                  showPlaceHolderWhenTextEquals: convertToMoney(ignorePrivacy: true, 
                     Provider.of<AllWallets>(context),
                     0,
                     currencyKey: Provider.of<AllWallets>(context, listen: true)

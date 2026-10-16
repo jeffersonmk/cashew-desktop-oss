@@ -1880,7 +1880,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                       onPressed: () {
                         ContextMenuController.removeAny();
                         copyToClipboard(
-                          convertToMoney(
+                          convertToMoney(ignorePrivacy: true, 
                             Provider.of<AllWallets>(context, listen: false),
                             currencyKey:
                                 Provider.of<AllWallets>(context, listen: false)
@@ -1926,7 +1926,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                                 alignment: AlignmentDirectional.centerEnd,
                                 child: TextFont(
                                   textAlign: TextAlign.end,
-                                  text: convertToMoney(
+                                  text: convertToMoney(ignorePrivacy: true, 
                                     Provider.of<AllWallets>(context),
                                     selectedAmount ?? 0,
                                     decimals: getSelectedWallet(listen: true)
@@ -1978,7 +1978,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                                       alignment: AlignmentDirectional.centerEnd,
                                       child: TextFont(
                                         textAlign: TextAlign.end,
-                                        text: convertToMoney(
+                                        text: convertToMoney(ignorePrivacy: true, 
                                           Provider.of<AllWallets>(context),
                                           (selectedAmount ?? 0) *
                                               (amountRatioToPrimaryCurrencyGivenPk(

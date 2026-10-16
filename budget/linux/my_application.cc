@@ -27,11 +27,13 @@ struct _MyApplication {
   gchar* label_quit;
   gchar* label_new_transaction;
   gchar* label_backup;
+  gchar* label_privacy;
   gchar* label_notification_open;
   GtkWidget* tray_open_item;
   GtkWidget* tray_quit_item;
   GtkWidget* tray_new_transaction_item;
   GtkWidget* tray_backup_item;
+  GtkWidget* tray_privacy_item;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
@@ -334,6 +336,10 @@ static void on_tray_backup(GtkMenuItem* item, gpointer user_data) {
   tray_action(MY_APPLICATION(user_data), "backup");
 }
 
+static void on_tray_privacy(GtkMenuItem* item, gpointer user_data) {
+  tray_action(MY_APPLICATION(user_data), "privacy");
+}
+
 static void enable_tray(MyApplication* self) {
   if (self->indicator != nullptr || !tray_available()) return;
   // The icon is looked up by name in the bundle's data/ folder.
@@ -369,6 +375,12 @@ static void enable_tray(MyApplication* self) {
   self->tray_backup_item = backup_item;
   g_signal_connect(backup_item, "activate", G_CALLBACK(on_tray_backup), self);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), backup_item);
+  GtkWidget* privacy_item = gtk_menu_item_new_with_label(
+      self->label_privacy != nullptr ? self->label_privacy : "Hide Amounts");
+  self->tray_privacy_item = privacy_item;
+  g_signal_connect(privacy_item, "activate", G_CALLBACK(on_tray_privacy),
+                   self);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu), privacy_item);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), gtk_separator_menu_item_new());
   GtkWidget* quit_item = gtk_menu_item_new_with_label(
       self->label_quit != nullptr ? self->label_quit : "Quit");
@@ -396,6 +408,7 @@ static void disable_tray(MyApplication* self) {
   self->tray_quit_item = nullptr;
   self->tray_new_transaction_item = nullptr;
   self->tray_backup_item = nullptr;
+  self->tray_privacy_item = nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -580,6 +593,14 @@ static void window_method_call_cb(FlMethodChannel* channel,
     const gchar* notification_open = map_string(args, "notificationOpen");
     const gchar* new_transaction = map_string(args, "newTransaction");
     const gchar* backup = map_string(args, "backup");
+    const gchar* privacy = map_string(args, "privacy");
+    if (privacy != nullptr) {
+      g_free(self->label_privacy);
+      self->label_privacy = g_strdup(privacy);
+      if (self->tray_privacy_item != nullptr)
+        gtk_menu_item_set_label(GTK_MENU_ITEM(self->tray_privacy_item),
+                                privacy);
+    }
     if (new_transaction != nullptr) {
       g_free(self->label_new_transaction);
       self->label_new_transaction = g_strdup(new_transaction);
@@ -786,6 +807,7 @@ static void my_application_dispose(GObject* object) {
   g_clear_pointer(&self->label_quit, g_free);
   g_clear_pointer(&self->label_new_transaction, g_free);
   g_clear_pointer(&self->label_backup, g_free);
+  g_clear_pointer(&self->label_privacy, g_free);
   g_clear_pointer(&self->label_notification_open, g_free);
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }

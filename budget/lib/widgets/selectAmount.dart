@@ -684,7 +684,7 @@ class _SelectAmountState extends State<SelectAmount> {
         ? calculateResult(amountConverted)
             .toString()
             .replaceAll(".", getDecimalSeparator())
-        : convertToMoney(
+        : convertToMoney(ignorePrivacy: true, 
             forceAbsoluteZero: false,
             Provider.of<AllWallets>(context),
             calculateResult(amountConverted),

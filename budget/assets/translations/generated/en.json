@@ -1230,5 +1230,8 @@
   "attachments-added": "{count} attachments added",
   "drop-attachment-here": "Open a transaction to attach files",
   "drop-attachment-here-description": "Drop files on the add or edit transaction screen",
-  "tray-backup-now": "Backup Now"
+  "tray-backup-now": "Backup Now",
+  "hide-amounts": "Hide Amounts",
+  "show-amounts": "Show Amounts",
+  "privacy-mode": "Hide/Show Amounts"
 }

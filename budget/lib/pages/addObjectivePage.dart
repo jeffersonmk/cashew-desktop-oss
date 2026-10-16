@@ -712,7 +712,7 @@ class _AddObjectivePageState extends State<AddObjectivePage>
                                         ),
                                       ),
                                       TappableTextEntry(
-                                        title: convertToMoney(
+                                        title: convertToMoney(ignorePrivacy: true, 
                                           Provider.of<AllWallets>(context),
                                           selectedAmount,
                                           currencyKey: Provider.of<AllWallets>(
@@ -721,7 +721,7 @@ class _AddObjectivePageState extends State<AddObjectivePage>
                                               .indexedByPk[selectedWalletPk]
                                               ?.currency,
                                         ),
-                                        placeholder: convertToMoney(
+                                        placeholder: convertToMoney(ignorePrivacy: true, 
                                           Provider.of<AllWallets>(context),
                                           0,
                                           currencyKey: Provider.of<AllWallets>(
@@ -731,7 +731,7 @@ class _AddObjectivePageState extends State<AddObjectivePage>
                                               ?.currency,
                                         ),
                                         showPlaceHolderWhenTextEquals:
-                                            convertToMoney(
+                                            convertToMoney(ignorePrivacy: true, 
                                           Provider.of<AllWallets>(context),
                                           0,
                                           currencyKey: Provider.of<AllWallets>(
@@ -809,7 +809,7 @@ class _AddObjectivePageState extends State<AddObjectivePage>
                                     ),
                                   ),
                                   TappableTextEntry(
-                                    title: convertToMoney(
+                                    title: convertToMoney(ignorePrivacy: true, 
                                       Provider.of<AllWallets>(context),
                                       selectedAmount,
                                       currencyKey: Provider.of<AllWallets>(
@@ -818,7 +818,7 @@ class _AddObjectivePageState extends State<AddObjectivePage>
                                           .indexedByPk[selectedWalletPk]
                                           ?.currency,
                                     ),
-                                    placeholder: convertToMoney(
+                                    placeholder: convertToMoney(ignorePrivacy: true, 
                                       Provider.of<AllWallets>(context),
                                       0,
                                       currencyKey: Provider.of<AllWallets>(
@@ -828,7 +828,7 @@ class _AddObjectivePageState extends State<AddObjectivePage>
                                           ?.currency,
                                     ),
                                     showPlaceHolderWhenTextEquals:
-                                        convertToMoney(
+                                        convertToMoney(ignorePrivacy: true, 
                                       Provider.of<AllWallets>(context),
                                       0,
                                       currencyKey: Provider.of<AllWallets>(
@@ -886,19 +886,19 @@ class _AddObjectivePageState extends State<AddObjectivePage>
                                                   " " +
                                                   "total".tr() +
                                                   ": " +
-                                                  convertToMoney(
+                                                  convertToMoney(ignorePrivacy: true, 
                                                     Provider.of<AllWallets>(
                                                         context),
                                                     selectedAmountConverted,
                                                   ) +
                                                   " + " +
-                                                  convertToMoney(
+                                                  convertToMoney(ignorePrivacy: true, 
                                                     Provider.of<AllWallets>(
                                                         context),
                                                     objectiveAmount,
                                                   ) +
                                                   " = " +
-                                                  convertToMoney(
+                                                  convertToMoney(ignorePrivacy: true, 
                                                     Provider.of<AllWallets>(
                                                         context),
                                                     objectiveAmount +
@@ -1174,7 +1174,7 @@ class _InstallmentObjectivePopupState extends State<InstallmentObjectivePopup> {
       title: "installment".tr(),
       subtitle: widget.objective.name +
           " (" +
-          convertToMoney(
+          convertToMoney(ignorePrivacy: true, 
               Provider.of<AllWallets>(context),
               objectiveAmountToPrimaryCurrency(
                       Provider.of<AllWallets>(context), widget.objective) *
@@ -1207,7 +1207,7 @@ class _InstallmentObjectivePopupState extends State<InstallmentObjectivePopup> {
                                 numberOfInstallmentPaymentsDisplay
                                     .toStringAsFixed(3));
                     String displayAmountPerInstallmentPaymentDisplay =
-                        convertToMoney(
+                        convertToMoney(ignorePrivacy: true, 
                       Provider.of<AllWallets>(context),
                       amountPerInstallmentPaymentDisplay == double.infinity
                           ? 0

@@ -1,3 +1,4 @@
+import 'package:budget/struct/desktopIntegration.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/main.dart';
 import 'package:budget/pages/editCategoriesPage.dart';
@@ -303,6 +304,22 @@ class NavigationSidebarState extends State<NavigationSidebar> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               SizedBox(height: 40),
+                              // Cashew Desktop: privacy mode (Ctrl+H).
+                              NavigationSidebarButton(
+                                label: appStateSettings["privacyMode"] == true
+                                    ? "show-amounts".tr()
+                                    : "hide-amounts".tr(),
+                                icon: appStateSettings["privacyMode"] == true
+                                    ? (appStateSettings["outlinedIcons"]
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_rounded)
+                                    : (appStateSettings["outlinedIcons"]
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_off_rounded),
+                                isSelected: false,
+                                popRoutes: false,
+                                onTap: () => togglePrivacyMode(),
+                              ),
                               NavigationSidebarButton(
                                 label: "backups".tr(),
                                 icon: appStateSettings["outlinedIcons"]

@@ -1230,5 +1230,8 @@
   "attachments-added": "{count} anexos adicionados",
   "drop-attachment-here": "Abra uma transação para anexar ficheiros",
   "drop-attachment-here-description": "Largue os ficheiros no ecrã de adicionar ou editar transação",
-  "tray-backup-now": "Fazer cópia de segurança agora"
+  "tray-backup-now": "Fazer cópia de segurança agora",
+  "hide-amounts": "Ocultar valores",
+  "show-amounts": "Mostrar valores",
+  "privacy-mode": "Ocultar/mostrar valores"
 }

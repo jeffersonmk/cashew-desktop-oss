@@ -24,6 +24,7 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "theme": "system", //system, light, dark
     "use24HourFormat": "system", //system, 12-hour, 24-hour
     "numberCountUpAnimation": true,
+    "privacyMode": false,
     "appAnimations": AppAnimations.all.index,
     "showFAQAndHelpLink": true,
     "showExtraInfoText": true,

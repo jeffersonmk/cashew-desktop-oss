@@ -93,6 +93,8 @@ Future<void> _onTrayAction(String? action) async {
   if (action == "newTransaction") {
     notificationPayload = "addTransaction";
     runNotificationPayLoadsNoContext();
+  } else if (action == "privacy") {
+    await togglePrivacyMode();
   } else if (action == "backup") {
     File? backup = await createLocalBackup(silent: true);
     await showDesktopNotification(
@@ -100,6 +102,13 @@ Future<void> _onTrayAction(String? action) async {
       body: backup?.path ?? "",
     );
   }
+}
+
+// Privacy mode: amounts are shown as dots (see convertToMoney).
+Future<void> togglePrivacyMode() async {
+  await updateSettings("privacyMode", appStateSettings["privacyMode"] != true,
+      updateGlobalState: true);
+  await sendDesktopLabels();
 }
 
 // Used by the "only if the app was not opened today" daily reminder.
@@ -128,6 +137,9 @@ Future<void> sendDesktopLabels() async {
       "quit": "quit-app".tr(),
       "newTransaction": "add-transaction".tr(),
       "backup": "tray-backup-now".tr(),
+      "privacy": appStateSettings["privacyMode"] == true
+          ? "show-amounts".tr()
+          : "hide-amounts".tr(),
       "notificationOpen": "notification-open".tr(),
     });
   } catch (e) {

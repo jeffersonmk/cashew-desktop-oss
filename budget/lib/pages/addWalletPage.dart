@@ -627,18 +627,18 @@ class _AddWalletPageState extends State<AddWalletPage> {
                     ),
                     Flexible(
                       child: TappableTextEntry(
-                        title: convertToMoney(
+                        title: convertToMoney(ignorePrivacy: true, 
                           Provider.of<AllWallets>(context),
                           currencyKey: selectedCurrency,
                           initialBalance,
                           decimals: selectedDecimals,
                         ),
-                        placeholder: convertToMoney(
+                        placeholder: convertToMoney(ignorePrivacy: true, 
                           Provider.of<AllWallets>(context),
                           currencyKey: selectedCurrency,
                           initialBalance,
                         ),
-                        showPlaceHolderWhenTextEquals: convertToMoney(
+                        showPlaceHolderWhenTextEquals: convertToMoney(ignorePrivacy: true, 
                           Provider.of<AllWallets>(context),
                           currencyKey: selectedCurrency,
                           0,
@@ -805,7 +805,7 @@ class _CorrectBalancePopupState extends State<CorrectBalancePopup> {
                     autoSizeText: true,
                     maxLines: 1,
                     minFontSize: 16,
-                    text: convertToMoney(
+                    text: convertToMoney(ignorePrivacy: true, 
                       Provider.of<AllWallets>(context),
                       totalWalletAmount,
                       currencyKey: widget.wallet.currency,
@@ -831,7 +831,7 @@ class _CorrectBalancePopupState extends State<CorrectBalancePopup> {
                       autoSizeText: true,
                       maxLines: 1,
                       minFontSize: 16,
-                      text: convertToMoney(
+                      text: convertToMoney(ignorePrivacy: true, 
                         Provider.of<AllWallets>(context),
                         enteredAmount,
                         currencyKey: widget.wallet.currency,
@@ -925,7 +925,7 @@ Future<bool> correctWalletBalance(
     String title) async {
   String transferString = wallet.name +
       ": " +
-      convertToMoney(
+      convertToMoney(ignorePrivacy: true, 
         Provider.of<AllWallets>(context, listen: false),
         newAmount,
         currencyKey: wallet.currency,
@@ -1433,7 +1433,7 @@ class _TransferBalancePopupState extends State<TransferBalancePopup> {
                           autoSizeText: true,
                           maxLines: 1,
                           minFontSize: 16,
-                          text: convertToMoney(
+                          text: convertToMoney(ignorePrivacy: true, 
                             Provider.of<AllWallets>(context),
                             enteredAmount
                                 .abs(), //We flip the arrow instead of showing negative
@@ -1486,7 +1486,7 @@ class _TransferBalancePopupState extends State<TransferBalancePopup> {
               //   child: Button(
               //     label: transferFee == 0
               //         ? "transfer-fee".tr()
-              //         : convertToMoney(
+              //         : convertToMoney(ignorePrivacy: true, 
               //             Provider.of<AllWallets>(context),
               //             transferFee.abs(),
               //             addCurrencyName: true,

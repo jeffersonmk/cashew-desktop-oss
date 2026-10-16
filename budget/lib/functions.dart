@@ -177,6 +177,8 @@ bool hasDecimalPoints(double? value) {
   return false;
 }
 
+const String privacyMask = "•••••";
+
 String convertToMoney(AllWallets allWallets, double amount,
     {String? currencyKey,
     double? finalNumber,
@@ -193,7 +195,13 @@ String convertToMoney(AllWallets allWallets, double amount,
     bool forceDefaultNumberFormatter = false,
     bool forceAbsoluteZero = true,
     NumberFormat Function(int? decimalDigits, String? locale, String? symbol)?
-        getCustomNumberFormat}) {
+        getCustomNumberFormat,
+    bool ignorePrivacy = false}) {
+  // Cashew Desktop: privacy mode hides amounts everywhere except where an
+  // amount is typed or edited (those calls pass ignorePrivacy).
+  if (!ignorePrivacy && appStateSettings["privacyMode"] == true) {
+    return privacyMask;
+  }
   int numberDecimals = decimals ??
       allWallets.indexedByPk[appStateSettings["selectedWalletPk"]]?.decimals ??
       2;
