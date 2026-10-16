@@ -1233,5 +1233,11 @@
   "tray-backup-now": "Backup Now",
   "hide-amounts": "Hide Amounts",
   "show-amounts": "Show Amounts",
-  "privacy-mode": "Hide/Show Amounts"
+  "privacy-mode": "Hide/Show Amounts",
+  "clean-unused-attachments": "Clean Unused Attachments",
+  "clean-unused-attachments-setting-description": "Files no transaction uses anymore",
+  "clean-unused-attachments-question": "Remove unused attachments?",
+  "clean-unused-attachments-description": "{count} files ({size}) are not used by any transaction. They will be moved to the trash. Older backups may still refer to them.",
+  "no-unused-attachments": "No unused attachments",
+  "unused-attachments-removed": "{count} attachments moved to the trash"
 }

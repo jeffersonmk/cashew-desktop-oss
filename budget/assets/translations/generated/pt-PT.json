@@ -1233,5 +1233,11 @@
   "tray-backup-now": "Fazer cópia de segurança agora",
   "hide-amounts": "Ocultar valores",
   "show-amounts": "Mostrar valores",
-  "privacy-mode": "Ocultar/mostrar valores"
+  "privacy-mode": "Ocultar/mostrar valores",
+  "clean-unused-attachments": "Limpar anexos sem uso",
+  "clean-unused-attachments-setting-description": "Ficheiros que nenhuma transação usa",
+  "clean-unused-attachments-question": "Remover anexos sem uso?",
+  "clean-unused-attachments-description": "{count} ficheiros ({size}) não são usados por nenhuma transação. Serão movidos para o lixo. Cópias de segurança antigas ainda podem precisar deles.",
+  "no-unused-attachments": "Nenhum anexo sem uso",
+  "unused-attachments-removed": "{count} anexos movidos para o lixo"
 }

@@ -1,4 +1,5 @@
 import 'package:budget/struct/localAttachments.dart';
+import 'package:budget/struct/attachmentCleanup.dart';
 // Cashew Desktop OSS: "Data Backup" page.
 //
 // Replaces the Google account / Google Drive page with local backups:
@@ -249,6 +250,15 @@ class AccountsPageState extends State<AccountsPage> {
                   : Icons.open_in_new_rounded,
               size: 38,
             ),
+          ),
+        if (localAttachmentsSupported)
+          SettingsContainer(
+            title: "clean-unused-attachments".tr(),
+            description: "clean-unused-attachments-setting-description".tr(),
+            icon: appStateSettings["outlinedIcons"]
+                ? Icons.cleaning_services_outlined
+                : Icons.cleaning_services_rounded,
+            onTap: () => openUnusedAttachmentsCleanup(context),
           ),
         SettingsHeader(title: "backups".tr()),
         if (backups.isEmpty)

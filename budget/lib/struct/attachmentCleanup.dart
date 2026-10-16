@@ -1,0 +1,120 @@
+// Cashew Desktop: find and remove attachment files that no transaction uses.
+//
+// Removing an attachment from a transaction (or deleting the transaction, or
+// restoring an older backup) never deletes the file, so the attachments
+// folder can fill up with files nothing points to; they also go into every
+// .zip backup. This lists them and, after the user confirms, moves them to
+// the desktop trash (gio trash) so a mistake can be undone. Only if there is
+// no trash are they deleted.
+
+import 'dart:io';
+
+import 'package:budget/functions.dart';
+import 'package:budget/struct/databaseGlobal.dart';
+import 'package:budget/struct/fullBackup.dart';
+import 'package:budget/struct/localAttachments.dart';
+import 'package:budget/struct/settings.dart';
+import 'package:budget/widgets/openPopup.dart';
+import 'package:budget/widgets/openSnackbar.dart';
+import 'package:budget/widgets/globalSnackbar.dart';
+import 'package:drift/drift.dart' show Variable;
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
+
+final RegExp _attachmentLinkPattern =
+    RegExp(RegExp.escape(attachmentScheme) + r'[^\s]+');
+
+// File names referenced by any transaction note.
+Future<Set<String>> referencedAttachmentNames() async {
+  List<String> notes = (await database
+          .customSelect("SELECT note FROM transactions WHERE note LIKE ?",
+              variables: [Variable.withString("%" + attachmentScheme + "%")])
+          .get())
+      .map((row) => row.read<String>("note"))
+      .toList();
+  Set<String> names = {};
+  for (String note in notes) {
+    for (RegExpMatch match in _attachmentLinkPattern.allMatches(note)) {
+      String? name = attachmentFileNameFromLink(match.group(0)!);
+      if (name != null) names.add(name);
+    }
+  }
+  return names;
+}
+
+Future<List<File>> findUnusedAttachments() async {
+  Set<String> used = await referencedAttachmentNames();
+  return (await listAttachmentFiles())
+      .where((file) => !used.contains(p.basename(file.path)))
+      .toList();
+}
+
+String formatFileSize(int bytes) {
+  if (bytes < 1024) return "$bytes B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toStringAsFixed(0) + " KB";
+  return (bytes / (1024 * 1024)).toStringAsFixed(1) + " MB";
+}
+
+// Moves the file to the trash; false if that is not possible.
+Future<bool> _moveToTrash(File file) async {
+  try {
+    ProcessResult result = await Process.run("gio", ["trash", file.path]);
+    return result.exitCode == 0;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Returns how many files were removed.
+Future<int> removeAttachmentFiles(List<File> files) async {
+  int removed = 0;
+  for (File file in files) {
+    try {
+      if (!await _moveToTrash(file)) await file.delete();
+      removed++;
+    } catch (e) {
+      print("Could not remove attachment " + file.path + ": " + e.toString());
+    }
+  }
+  return removed;
+}
+
+Future<void> openUnusedAttachmentsCleanup(BuildContext context) async {
+  List<File> unused = await findUnusedAttachments();
+  IconData icon = appStateSettings["outlinedIcons"]
+      ? Icons.cleaning_services_outlined
+      : Icons.cleaning_services_rounded;
+  if (unused.isEmpty) {
+    openSnackbar(SnackbarMessage(
+      title: "no-unused-attachments".tr(),
+      icon: icon,
+    ));
+    return;
+  }
+  int totalBytes = 0;
+  for (File file in unused) {
+    totalBytes += await file.length();
+  }
+  await openPopup(
+    context,
+    icon: icon,
+    title: "clean-unused-attachments-question".tr(),
+    description: "clean-unused-attachments-description".tr(namedArgs: {
+      "count": unused.length.toString(),
+      "size": formatFileSize(totalBytes),
+    }),
+    onCancelLabel: "cancel".tr(),
+    onCancel: () => popRoute(context),
+    onSubmitLabel: "remove".tr(),
+    onSubmit: () async {
+      popRoute(context);
+      int removed = await removeAttachmentFiles(unused);
+      openSnackbar(SnackbarMessage(
+        title: "unused-attachments-removed"
+            .tr(namedArgs: {"count": removed.toString()}),
+        icon: icon,
+      ));
+    },
+  );
+}
