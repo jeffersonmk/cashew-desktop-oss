@@ -46,7 +46,7 @@ class SelectChips<T> extends StatefulWidget {
   final Function(T)? onLongPress;
   final bool wrapped;
   final double? extraHorizontalPadding;
-  final Widget Function(T)? getAvatar;
+  final Widget? Function(T)? getAvatar;
   final Color? selectedColor;
   final scrollablePositionedList;
   final EdgeInsetsDirectional? padding;

@@ -1,3 +1,4 @@
+import 'package:budget/struct/bankIcons.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addTransactionPage.dart';
@@ -58,7 +59,7 @@ class _AddWalletPageState extends State<AddWalletPage> {
   String? selectedTitle;
   late Color? selectedColor =
       widget.wallet?.colour == null ? null : HexColor(widget.wallet?.colour);
-  String? selectedIconName;
+  late String? selectedIconName = widget.wallet?.iconName;
   Map<String, dynamic> currencies = {};
   bool customCurrencyIcon = false;
   String? searchCurrency = "";
@@ -118,6 +119,7 @@ class _AddWalletPageState extends State<AddWalletPage> {
       walletPk: widget.wallet != null ? widget.wallet!.walletPk : "-1",
       name: selectedTitle ?? "",
       colour: toHexString(selectedColor),
+      iconName: walletHasIconName(selectedIconName) ? selectedIconName : null,
       dateCreated:
           widget.wallet != null ? widget.wallet!.dateCreated : DateTime.now(),
       dateTimeModified: null,
@@ -468,6 +470,40 @@ class _AddWalletPageState extends State<AddWalletPage> {
           ),
           SliverToBoxAdapter(
             child: SizedBox(height: 15),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(
+                start: 24,
+                end: 24,
+                bottom: 10,
+              ),
+              child: SettingsContainer(
+                isOutlined: true,
+                isWideOutlined: true,
+                onTap: () async {
+                  String? result = await selectWalletIconPopup(context,
+                      currentIconName: selectedIconName);
+                  if (result == null) return;
+                  setState(() {
+                    selectedIconName = result == "" ? null : result;
+                  });
+                  determineBottomButton();
+                },
+                title: "bank-or-account".tr(),
+                description: bankFromIconName(selectedIconName)?.name ??
+                    (isCustomWalletIcon(selectedIconName)
+                        ? "custom-image".tr()
+                        : "no-icon".tr()),
+                icon: appStateSettings["outlinedIcons"]
+                    ? Icons.account_balance_outlined
+                    : Icons.account_balance_rounded,
+                iconScale: 1,
+                afterWidget: walletHasIconName(selectedIconName)
+                    ? WalletIcon(iconName: selectedIconName, size: 34)
+                    : null,
+              ),
+            ),
           ),
           SliverToBoxAdapter(
             child: widget.wallet == null ||

@@ -1,3 +1,4 @@
+import 'package:budget/struct/bankIcons.dart';
 import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
@@ -266,10 +267,23 @@ class _EditWalletsPageState extends State<EditWalletsPage> {
                       content: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextFont(
-                            text: wallet.name,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 21,
+                          Row(
+                            children: [
+                              if (walletHasIcon(wallet))
+                                Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      end: 8),
+                                  child: WalletIcon(
+                                      iconName: wallet.iconName, size: 26),
+                                ),
+                              Flexible(
+                                child: TextFont(
+                                  text: wallet.name,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 21,
+                                ),
+                              ),
+                            ],
                           ),
                           Container(height: 2),
                           TextFont(
@@ -574,6 +588,14 @@ Future<TransactionWallet?> selectWalletPopup(
                       );
                     },
               initial: selectedWallet,
+              getLeading: currencyOnly
+                  ? null
+                  : (Object? object) {
+                      TransactionWallet? wallet;
+                      if (object is WalletWithDetails) wallet = object.wallet;
+                      if (!walletHasIcon(wallet)) return null;
+                      return WalletIcon(iconName: wallet?.iconName, size: 26);
+                    },
               onChanged: (Object? object) {
                 TransactionWallet? wallet;
                 if (object is WalletWithDetails) wallet = object.wallet;

@@ -1285,5 +1285,13 @@
   "undo-restore-warning": "Os dados de antes da última restauração voltam. Os dados atuais ficam guardados, então isso também pode ser desfeito.",
   "undo-restore-confirm": "Desfazer",
   "not-a-cashew-backup": "Este arquivo não é um backup do Cashew. Nada foi alterado.",
-  "unused-attachments-moved-to-folder": "{count} anexos movidos para a pasta \"{folder}\" (na pasta de dados)"
+  "unused-attachments-moved-to-folder": "{count} anexos movidos para a pasta \"{folder}\" (na pasta de dados)",
+  "bank-or-account": "Banco ou conta digital",
+  "bank-or-account-description": "Escolha o logo que aparece junto desta conta",
+  "search-bank": "Buscar banco",
+  "no-icon": "Nenhum",
+  "custom-image": "Imagem própria",
+  "choose-image": "Escolher imagem",
+  "image-not-supported": "Formato de imagem não suportado",
+  "no-search-results": "Nenhum resultado"
 }

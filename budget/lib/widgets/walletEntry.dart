@@ -1,3 +1,4 @@
+import 'package:budget/struct/bankIcons.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addWalletPage.dart';
@@ -63,6 +64,16 @@ class WalletEntry extends StatelessWidget {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
+                    if (walletHasIcon(walletWithDetails.wallet))
+                      PositionedDirectional(
+                        end: -12,
+                        top: -6,
+                        child: WalletIcon(
+                          iconName: walletWithDetails.wallet.iconName,
+                          size: 26,
+                        ),
+                      )
+                    else
                     PositionedDirectional(
                       end: -11,
                       top: -5,
@@ -84,7 +95,10 @@ class WalletEntry extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: const EdgeInsetsDirectional.only(end: 17),
+                            padding: EdgeInsetsDirectional.only(
+                                end: walletHasIcon(walletWithDetails.wallet)
+                                    ? 22
+                                    : 17),
                             child: TextFont(
                               text: walletWithDetails.wallet.name,
                               fontWeight: FontWeight.bold,
@@ -189,7 +203,21 @@ class WalletEntryRow extends StatelessWidget {
                       children: [
                         ScaledAnimatedSwitcher(
                           keyToWatch: selected.toString(),
-                          child: selected
+                          child: !isCurrencyRow &&
+                                  walletHasIcon(walletWithDetails.wallet)
+                              ? WalletIcon(
+                                  iconName: walletWithDetails.wallet.iconName,
+                                  size: 24,
+                                  borderColor: selected
+                                      ? HexColor(
+                                          walletWithDetails.wallet.colour,
+                                          defaultColor: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ).withOpacity(0.7)
+                                      : null,
+                                )
+                              : selected
                               ? Container(
                                   decoration: BoxDecoration(
                                     borderRadius:

@@ -1,3 +1,4 @@
+import 'package:budget/struct/bankIcons.dart';
 import 'dart:math';
 
 import 'package:budget/database/tables.dart';
@@ -824,6 +825,11 @@ class _TransactionFiltersSelectionState
                 routesToPopAfterDelete: RoutesToPopAfterDelete.PreventDelete,
               ),
             );
+          },
+          getAvatar: (TransactionWallet item) {
+            return walletHasIcon(item)
+                ? WalletIcon(iconName: item.iconName, size: 20)
+                : null;
           },
           getLabel: (TransactionWallet item) {
             return getWalletStringName(Provider.of<AllWallets>(context), item);

@@ -16,6 +16,8 @@ class RadioItems<T> extends StatefulWidget {
   final bool ifNullSelectNone;
   final bool itemsAreFonts;
   final bool Function(T item)? getSelected;
+  // Cashew Desktop: optional widget before the text (e.g. the bank icon).
+  final Widget? Function(T item)? getLeading;
 
   const RadioItems({
     Key? key,
@@ -30,6 +32,7 @@ class RadioItems<T> extends StatefulWidget {
     this.getSelected,
     this.ifNullSelectNone = false,
     this.itemsAreFonts = false,
+    this.getLeading,
   }) : super(key: key);
 
   @override
@@ -58,6 +61,8 @@ class _RadioItemsState<T> extends State<RadioItems<T>> {
       if (item == null && widget.ifNullSelectNone == true) selected = false;
       bool noDescription =
           widget.getDescription == null || widget.getDescription!(item) == "";
+      Widget? leading =
+          widget.getLeading == null ? null : widget.getLeading!(item);
       children.add(
         AnimatedSwitcher(
           duration: Duration(milliseconds: 150),
@@ -84,6 +89,11 @@ class _RadioItemsState<T> extends State<RadioItems<T>> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    if (leading != null)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(end: 10),
+                        child: leading,
+                      ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

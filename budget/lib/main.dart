@@ -1,3 +1,4 @@
+import 'package:budget/struct/bankIcons.dart';
 import 'package:budget/struct/migrateDataFolder.dart';
 import 'package:budget/struct/localTimezone.dart';
 import 'package:budget/functions.dart';
@@ -53,6 +54,7 @@ void main() async {
     await loadCurrencyJSON();
     await loadLanguageNamesJSON();
     await initializeSettings();
+    await loadWalletIconsDirectory();
     tz.initializeTimeZones();
     tz.setLocalLocation(await getLocalTimezoneLocation());
     iconObjects.sort((a, b) => (a.mostLikelyCategoryName ?? a.icon)

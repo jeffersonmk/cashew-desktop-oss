@@ -14,6 +14,19 @@ How to use:
 
 ## [Unreleased]
 
+### Added
+- **Bank icon for accounts**: in Edit account → "Bank or Digital Account",
+  pick the logo of the bank or digital account (32 Brazilian institutions:
+  Nubank, Inter, Itaú, Banco do Brasil, Caixa, Bradesco, Santander, C6,
+  PicPay, Mercado Pago, PagBank, Sicoob, Sicredi, XP...) or your own image.
+  The logo appears on the account cards, the account lists and pickers,
+  the transaction filters and the account tag of each transaction. It is
+  saved in a field the original Cashew already had, so the database and
+  backups stay compatible. Custom images are kept in the attachments folder
+  and go into .zip backups. Logos from
+  [logos-bancos-br](https://github.com/rzmt/logos-bancos-br); see
+  `budget/assets/banks/NOTICE.md`.
+
 ## [1.0.6] - 2026-10-16
 
 ### Added

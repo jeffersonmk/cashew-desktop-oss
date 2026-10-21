@@ -1,3 +1,4 @@
+import 'package:budget/struct/bankIcons.dart';
 import 'package:budget/struct/localAttachments.dart';
 import 'package:budget/database/generatePreviewData.dart';
 import 'package:budget/database/tables.dart';
@@ -1458,6 +1459,11 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                               ),
                               amount: 0.4,
                             );
+                          },
+                          getAvatar: (TransactionWallet wallet) {
+                            return walletHasIcon(wallet)
+                                ? WalletIcon(iconName: wallet.iconName, size: 20)
+                                : null;
                           },
                           getLabel: (TransactionWallet wallet) {
                             return getWalletStringName(

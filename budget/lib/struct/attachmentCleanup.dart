@@ -35,6 +35,17 @@ Future<Set<String>> referencedAttachmentNames() async {
       .map((row) => row.read<String>("note"))
       .toList();
   Set<String> names = {};
+  // Cashew Desktop: custom account (bank) icons live in the same folder.
+  List<String> walletIcons = (await database
+          .customSelect("SELECT icon_name FROM wallets WHERE icon_name LIKE ?",
+              variables: [Variable.withString(attachmentScheme + "%")])
+          .get())
+      .map((row) => row.read<String>("icon_name"))
+      .toList();
+  for (String iconName in walletIcons) {
+    String? name = attachmentFileNameFromLink(iconName);
+    if (name != null) names.add(name);
+  }
   for (String note in notes) {
     for (RegExpMatch match in _attachmentLinkPattern.allMatches(note)) {
       String? name = attachmentFileNameFromLink(match.group(0)!);

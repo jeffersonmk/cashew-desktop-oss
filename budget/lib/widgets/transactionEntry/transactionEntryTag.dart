@@ -1,3 +1,4 @@
+import 'package:budget/struct/bankIcons.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/objectivesListPage.dart';
@@ -72,6 +73,18 @@ class TransactionEntryTag extends StatelessWidget {
                   Provider.of<AllWallets>(context),
                   Provider.of<AllWallets>(context)
                       .indexedByPk[transaction.walletFk]),
+              leading: walletHasIcon(Provider.of<AllWallets>(context)
+                      .indexedByPk[transaction.walletFk])
+                  ? Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 3),
+                      child: WalletIcon(
+                        iconName: Provider.of<AllWallets>(context)
+                            .indexedByPk[transaction.walletFk]
+                            ?.iconName,
+                        size: 12,
+                      ),
+                    )
+                  : null,
             ),
             // 1
             Builder(builder: (context) {
