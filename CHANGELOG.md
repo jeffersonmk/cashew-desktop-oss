@@ -14,6 +14,11 @@ How to use:
 
 ## [Unreleased]
 
+### Fixed
+- "Erase everything" no longer says Google Drive backups will be kept: it
+  now says local backups and attachment files stay on the computer. The CSV
+  export warning points to Backups instead of Google Drive.
+
 ## [1.0.7] - 2026-10-21
 
 ### Added
