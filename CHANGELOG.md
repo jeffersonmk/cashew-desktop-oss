@@ -14,6 +14,8 @@ How to use:
 
 ## [Unreleased]
 
+## [1.0.7] - 2026-10-21
+
 ### Added
 - **Bank icon for accounts**: in Edit account → "Bank or Digital Account",
   pick the logo of the bank or digital account (32 Brazilian institutions:
@@ -183,7 +185,10 @@ First release of Cashew Desktop, a fork of
 ### Fixed
 - Startup on Linux (notifications and time zone detection).
 
-[Unreleased]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.4...HEAD
+[Unreleased]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.7...HEAD
+[1.0.7]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.6...v1.0.7
+[1.0.6]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.5...v1.0.6
+[1.0.5]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.1...v1.0.2
