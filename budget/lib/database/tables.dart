@@ -5384,6 +5384,27 @@ class FinanceDatabase extends _$FinanceDatabase {
     }
   }
 
+  // Cashew Desktop: one-shot version of watchTotalAmountObjectiveLoan.
+  Future<double> getTotalAmountObjectiveLoan(
+      AllWallets allWallets, Objective objective) async {
+    double totalAmount = 0;
+    for (TransactionWallet wallet in allWallets.list) {
+      final totalAmt =
+          transactions.amount.sum(filter: transactions.paid.equals(true));
+      final query = selectOnly(transactions)
+        ..addColumns([totalAmt])
+        ..where(transactions.objectiveLoanFk.equals(objective.objectivePk) &
+            transactions.walletFk.equals(wallet.walletPk) &
+            transactions.income.equals(!objective.income));
+      totalAmount += await query
+          .map(((row) =>
+              (row.read(totalAmt) ?? 0) *
+              (amountRatioToPrimaryCurrency(allWallets, wallet.currency))))
+          .getSingle();
+    }
+    return totalAmount;
+  }
+
   Stream<double?> watchTotalAmountObjectiveLoan(
       AllWallets allWallets, Objective objective) {
     List<Stream<double?>> mergedStreams = [];
@@ -5442,9 +5463,11 @@ class FinanceDatabase extends _$FinanceDatabase {
       query = selectOnly(transactions)
         ..addColumns([totalAmt])
         ..where(
+          // Cashew Desktop: goals use objectiveFk (upstream summed the loan
+          // column here for both, so goals always returned 0).
           (objectiveType == ObjectiveType.loan
                   ? transactions.objectiveLoanFk.equals(objectivePk)
-                  : transactions.objectiveLoanFk.equals(objectivePk)) &
+                  : transactions.objectiveFk.equals(objectivePk)) &
               transactions.walletFk.equals(wallet.walletPk),
         );
 

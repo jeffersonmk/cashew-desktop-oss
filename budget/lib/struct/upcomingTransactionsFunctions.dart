@@ -1,3 +1,4 @@
+import 'package:budget/struct/objectiveProgress.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addTransactionPage.dart';
@@ -62,36 +63,35 @@ Future createNewSubscriptionTransaction(
         return;
       }
 
-      //Goal reached
-      if (transaction.objectiveFk != null && transaction.endDate == null) {
-        Objective objective =
-            await database.getObjectiveInstance(transaction.objectiveFk!);
-        double? totalSpentOfObjective = await database.getTotalTowardsObjective(
-            Provider.of<AllWallets>(context, listen: false),
-            transaction.objectiveFk!,
-            objective.type);
-
-        bool willBeOverObjective = (totalSpentOfObjective ?? 0) >=
-            (objective.amount * (objective.income ? 1 : -1));
-
-        if (objective.income == false)
-          willBeOverObjective = !willBeOverObjective;
-
-        if ((totalSpentOfObjective ?? 0) ==
-            (objective.amount * (objective.income ? 1 : -1)))
-          willBeOverObjective = true;
-
-        if (willBeOverObjective) {
-          openSnackbar(
-            SnackbarMessage(
-              title: "goal-reached".tr(),
-              description: "for".tr().capitalizeFirst + " " + objective.name,
-              icon: appStateSettings["outlinedIcons"]
-                  ? Icons.event_available_outlined
-                  : Icons.event_available_rounded,
-            ),
-          );
-          return;
+      // Goal reached / loan settled ("until goal reached" installments).
+      // Cashew Desktop: uses the same progress as the goal page; upstream
+      // read the wrong column for goals and never checked loans.
+      String? objectivePk =
+          transaction.objectiveFk ?? transaction.objectiveLoanFk;
+      if (objectivePk != null && transaction.endDate == null) {
+        Objective? objective;
+        try {
+          objective = await database.getObjectiveInstance(objectivePk);
+        } catch (e) {
+          objective = null; // goal deleted: keep repeating as before
+        }
+        if (objective != null) {
+          ObjectiveProgress progress = await getObjectiveProgress(
+              Provider.of<AllWallets>(context, listen: false), objective);
+          if (progress.reached) {
+            openSnackbar(
+              SnackbarMessage(
+                title: objective.type == ObjectiveType.loan
+                    ? "loan-accomplished".tr()
+                    : "goal-reached".tr(),
+                description: "for".tr().capitalizeFirst + " " + objective.name,
+                icon: appStateSettings["outlinedIcons"]
+                    ? Icons.event_available_outlined
+                    : Icons.event_available_rounded,
+              ),
+            );
+            return;
+          }
         }
       }
 

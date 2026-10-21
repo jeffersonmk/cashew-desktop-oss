@@ -15,6 +15,11 @@ How to use:
 ## [Unreleased]
 
 ### Fixed
+- Installments of a goal or loan set to "until goal reached" / "until loan
+  paid off" now stop once the goal is reached or the loan is settled. Before
+  (also in the original Cashew) a new installment was created forever: the
+  check read the wrong column for goals and skipped loans. The check now
+  uses the same progress shown on the goal page, in the primary currency.
 - "Erase everything" no longer says Google Drive backups will be kept: it
   now says local backups and attachment files stay on the computer. The CSV
   export warning points to Backups instead of Google Drive.

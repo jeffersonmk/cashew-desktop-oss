@@ -1,3 +1,4 @@
+import 'package:budget/struct/objectiveProgress.dart';
 import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
@@ -1013,59 +1014,36 @@ class WatchTotalAndAmountOfObjective extends StatelessWidget {
       stream: database.watchTotalTowardsObjective(
           Provider.of<AllWallets>(context), objective),
       builder: (context, snapshot) {
+        AllWallets allWallets = Provider.of<AllWallets>(context);
+        int decimals = allWallets
+                .indexedByPk[appStateSettings["selectedWalletPk"]]?.decimals ??
+            2;
         if (objective.type == ObjectiveType.loan) {
           return StreamBuilder<double?>(
             stream: database.watchTotalAmountObjectiveLoan(
                 Provider.of<AllWallets>(context, listen: true), objective),
             builder: (context, snapshotAmount) {
-              double objectiveAmount = (snapshotAmount.data ?? 0);
-              if (getIsDifferenceOnlyLoan(objective) == false) {
-                double objectiveAmountConverted = objective.amount *
-                    amountRatioToPrimaryCurrency(
-                      Provider.of<AllWallets>(context),
-                      Provider.of<AllWallets>(context)
-                          .indexedByPk[objective.walletFk]
-                          ?.currency,
-                    );
-                objectiveAmount = objectiveAmount +
-                    (objectiveAmountConverted * (objective.income ? -1 : 1));
-              }
-              double totalAmount =
-                  ((snapshot.data ?? 0) - (snapshotAmount.data ?? 0)) * -1;
-              double percentageTowardsGoal =
-                  objectiveAmount == 0 ? 0 : totalAmount / objectiveAmount;
-              percentageTowardsGoal = absoluteZero(percentageTowardsGoal);
-              if (getIsDifferenceOnlyLoan(objective)) {
-                int numberDecimals = Provider.of<AllWallets>(context)
-                        .indexedByPk[appStateSettings["selectedWalletPk"]]
-                        ?.decimals ??
-                    2;
-                if ((double.tryParse(getDifferenceOfLoan(
-                                objective, totalAmount, objectiveAmount)
-                            .abs()
-                            .toStringAsFixed(numberDecimals)) ==
-                        0) &&
-                    snapshot.hasData &&
-                    snapshotAmount.hasData)
-                  percentageTowardsGoal = 1;
-                else
-                  percentageTowardsGoal = 0;
-              }
-              return builder(
-                  objectiveAmount * (objective.income ? -1 : 1),
-                  totalAmount * (objective.income ? -1 : 1),
-                  percentageTowardsGoal);
+              ObjectiveProgress progress = computeObjectiveProgress(
+                allWallets: allWallets,
+                objective: objective,
+                totalTowards: snapshot.hasData ? (snapshot.data ?? 0) : null,
+                loanAmount:
+                    snapshotAmount.hasData ? (snapshotAmount.data ?? 0) : null,
+                decimals: decimals,
+              );
+              return builder(progress.objectiveAmount, progress.totalAmount,
+                  progress.percentageTowardsGoal);
             },
           );
         } else {
-          double objectiveAmount = objectiveAmountToPrimaryCurrency(
-              Provider.of<AllWallets>(context, listen: true), objective);
-          double totalAmount = snapshot.data ?? 0;
-          if (objective.income == false) totalAmount = totalAmount * -1;
-          double percentageTowardsGoal =
-              objectiveAmount == 0 ? 0 : totalAmount / objectiveAmount;
-          percentageTowardsGoal = absoluteZero(percentageTowardsGoal);
-          return builder(objectiveAmount, totalAmount, percentageTowardsGoal);
+          ObjectiveProgress progress = computeObjectiveProgress(
+            allWallets: allWallets,
+            objective: objective,
+            totalTowards: snapshot.data,
+            decimals: decimals,
+          );
+          return builder(progress.objectiveAmount, progress.totalAmount,
+              progress.percentageTowardsGoal);
         }
       },
     );
