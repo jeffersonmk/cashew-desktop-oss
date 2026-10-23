@@ -11,31 +11,100 @@ loadCurrencyJSON() async {
       await rootBundle.loadString('assets/static/generated/currencies.json'));
 }
 
+// Cashew Desktop: exchange rates come from fawazahmed0/exchange-api
+// (https://github.com/fawazahmed0/exchange-api, CC0). The same files are
+// published by the same author on jsDelivr (npm package) and on Cloudflare
+// Pages; the author asks apps to fall back to the second when the first
+// fails. Both are HTTPS and only JSON is read (never code), and a response is
+// only accepted if it looks like a real rate table (see parseExchangeRates).
+const List<String> exchangeRateSources = [
+  "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json",
+  "https://latest.currency-api.pages.dev/v1/currencies/usd.min.json",
+];
+
+class ExchangeRatesResult {
+  ExchangeRatesResult(this.rates, this.date);
+  final Map<String, double> rates;
+  final String? date; // "YYYY-MM-DD", the day the rates are from
+}
+
+// Returns null unless [body] is a plausible table of rates from 1 USD:
+// {"date": "...", "usd": {"brl": 5.02, "btc": 0.000012, ...}}. Entries that
+// are not positive finite numbers are dropped.
+ExchangeRatesResult? parseExchangeRates(String body) {
+  try {
+    dynamic decoded = json.decode(body);
+    if (decoded is! Map || decoded["usd"] is! Map) return null;
+    Map<String, double> rates = {};
+    (decoded["usd"] as Map).forEach((key, value) {
+      if (key is String && value is num && value.isFinite && value > 0) {
+        rates[key.toLowerCase()] = value.toDouble();
+      }
+    });
+    double? usd = rates["usd"];
+    if (rates.length < 100 || usd == null || (usd - 1).abs() > 0.000001) {
+      return null;
+    }
+    dynamic date = decoded["date"];
+    return ExchangeRatesResult(
+        rates,
+        date is String && RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(date)
+            ? date
+            : null);
+  } catch (e) {
+    return null;
+  }
+}
+
 Future<bool> getExchangeRates() async {
   print("Getting exchange rates for current wallets");
-  // List<String?> uniqueCurrencies =
-  //     await database.getUniqueCurrenciesFromWallets();
-  Map<dynamic, dynamic> cachedCurrencyExchange =
-      appStateSettings["cachedCurrencyExchange"];
-  try {
-    Uri url = Uri.parse(
-        "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json");
-    dynamic response = await http.get(url);
-    if (response.statusCode == 200) {
-      cachedCurrencyExchange = json.decode(response.body)?["usd"];
+  ExchangeRatesResult? result;
+  String? usedSource;
+  for (String source in exchangeRateSources) {
+    try {
+      http.Response response =
+          await http.get(Uri.parse(source)).timeout(Duration(seconds: 20));
+      if (response.statusCode == 200) {
+        result = parseExchangeRates(response.body);
+        if (result != null) {
+          usedSource = source;
+          break;
+        }
+      }
+      print("Exchange rates: invalid response from " + source);
+    } catch (e) {
+      print("Error getting currency rates from " + source + ": " + e.toString());
     }
-  } catch (e) {
-    print("Error getting currency rates: " + e.toString());
-    return false;
   }
-  // print(cachedCurrencyExchange);
+  if (result == null) return false;
+  bool firstTime =
+      (appStateSettings["cachedCurrencyExchange"] ?? {}).keys.length <= 0;
+  updateSettings("cachedCurrencyExchangeDate", result.date,
+      updateGlobalState: false);
+  updateSettings(
+      "cachedCurrencyExchangeFetched", DateTime.now().toIso8601String(),
+      updateGlobalState: false);
+  updateSettings("cachedCurrencyExchangeSource", Uri.parse(usedSource!).host,
+      updateGlobalState: false);
   updateSettings(
     "cachedCurrencyExchange",
-    cachedCurrencyExchange,
-    updateGlobalState:
-        appStateSettings["cachedCurrencyExchange"].keys.length <= 0,
+    result.rates,
+    updateGlobalState: firstTime,
   );
   return true;
+}
+
+// False when the app has rates but none for [currencyKey], so amounts in it
+// would be converted as if 1 unit were 1 USD. A custom rate set by the user
+// counts as a rate. Before the first download nothing is known: true.
+bool currencyHasExchangeRate(String? currencyKey,
+    {Map<String, dynamic>? appStateSettingsPassed}) {
+  Map<String, dynamic> settings = appStateSettingsPassed ?? appStateSettings;
+  if (currencyKey == null || currencyKey == "") return true;
+  if (settings["customCurrencyAmounts"]?[currencyKey] != null) return true;
+  Map? cached = settings["cachedCurrencyExchange"];
+  if (cached == null || cached.isEmpty) return true;
+  return cached[currencyKey] != null;
 }
 
 double amountRatioToPrimaryCurrencyGivenPk(

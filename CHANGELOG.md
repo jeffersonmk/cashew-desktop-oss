@@ -14,6 +14,21 @@ How to use:
 
 ## [Unreleased]
 
+### Added
+- Exchange rates: currencies the rates API has no rate for (about 200 of
+  the crypto list, e.g. TON, WBTC, MATIC) are now marked "No exchange rate"
+  in the currency picker and on the Exchange Rates page, and an account in
+  such a currency shows a warning (tap to set a custom rate). Before, they
+  were silently counted as 1 = 1 USD.
+- Exchange Rates page shows the date of the rates and when they were
+  downloaded.
+
+### Changed
+- Exchange rates fall back to the API's official mirror on Cloudflare
+  (`latest.currency-api.pages.dev`) when jsDelivr fails, as the API author
+  recommends. Responses are only accepted if they are a valid USD rate
+  table.
+
 ### Fixed
 - Side menu clock: the time no longer fades out on its right side (e.g.
   "11:2" with a faded "2") when the side menu is narrow; the whole time

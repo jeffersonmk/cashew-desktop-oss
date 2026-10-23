@@ -1293,5 +1293,9 @@
   "custom-image": "Imagem própria",
   "choose-image": "Escolher imagem",
   "image-not-supported": "Formato de imagem não suportado",
-  "no-search-results": "Nenhum resultado"
+  "no-search-results": "Nenhum resultado",
+  "no-exchange-rate": "Sem cotação",
+  "no-exchange-rate-description": "Não há cotação para {currency}: os valores nessa moeda entram nos totais e conversões como 1 {currency} = 1 USD. Toque para definir uma cotação manual.",
+  "exchange-rates-from": "Cotações de {date}",
+  "exchange-rates-updated": "transferidas {time}"
 }

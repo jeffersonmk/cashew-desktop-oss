@@ -1293,5 +1293,9 @@
   "custom-image": "Custom Image",
   "choose-image": "Choose Image",
   "image-not-supported": "Image format not supported",
-  "no-search-results": "No results"
+  "no-search-results": "No results",
+  "no-exchange-rate": "No exchange rate",
+  "no-exchange-rate-description": "There is no exchange rate for {currency}: amounts in it are counted as 1 {currency} = 1 USD in totals and conversions. Tap to set a custom rate.",
+  "exchange-rates-from": "Rates from {date}",
+  "exchange-rates-updated": "downloaded {time}"
 }

@@ -1,3 +1,4 @@
+import 'package:budget/pages/exchangeRatesPage.dart';
 import 'package:budget/struct/bankIcons.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
@@ -719,6 +720,19 @@ class _AddWalletPageState extends State<AddWalletPage> {
               ),
             ),
           SliverToBoxAdapter(child: SizedBox(height: 10)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: 24,
+                end: 24,
+                bottom: currencyHasExchangeRate(selectedCurrency) ? 0 : 12,
+              ),
+              child: MissingExchangeRateWarning(
+                currencyKey: selectedCurrency,
+                onRateSet: () => setState(() {}),
+              ),
+            ),
+          ),
           CurrencyPicker(
             showExchangeRateInfoNotice: true,
             onSelected: setSelectedCurrency,

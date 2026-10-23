@@ -369,6 +369,17 @@ class CurrencyItem extends StatelessWidget {
                       fontSize: 10,
                       textAlign: TextAlign.center,
                     ),
+                  // Cashew Desktop: the rates API has no rate for it.
+                  if (!currencyHasExchangeRate(currencyKey))
+                    TextFont(
+                      key: ValueKey("noRate"),
+                      text: "no-exchange-rate".tr(),
+                      fontSize: 10,
+                      maxLines: 2,
+                      fontWeight: FontWeight.bold,
+                      textColor: Theme.of(context).colorScheme.error,
+                      textAlign: TextAlign.center,
+                    ),
                 ],
               ),
             ),

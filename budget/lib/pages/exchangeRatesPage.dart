@@ -74,6 +74,18 @@ class _ExchangeRatesState extends State<ExchangeRates> {
     for (String key in customCurrencies) {
       currencyExchange[key] = null;
     }
+    // Cashew Desktop: currencies of your accounts that have no rate are
+    // listed first, so they can be given a custom rate.
+    Map<dynamic, dynamic> missingRates = {};
+    for (TransactionWallet wallet in Provider.of<AllWallets>(context).list) {
+      String? currency = wallet.currency;
+      if (currency != null &&
+          !customCurrencies.contains(currency) &&
+          appStateSettings["cachedCurrencyExchange"]?[currency] == null &&
+          (appStateSettings["cachedCurrencyExchange"] ?? {}).isNotEmpty)
+        missingRates[currency] = null;
+    }
+    currencyExchange = {...missingRates, ...currencyExchange};
     currencyExchange.addAll(appStateSettings["cachedCurrencyExchange"]);
     if (currencyExchange.keys.length <= 0) {
       for (String key in currenciesJSON.keys) {
@@ -148,6 +160,20 @@ class _ExchangeRatesState extends State<ExchangeRates> {
             link: "https://github.com/fawazahmed0/exchange-api",
           ),
         ),
+        if (exchangeRatesDateText(context) != null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: 17, vertical: 4),
+              child: TextFont(
+                text: exchangeRatesDateText(context)!,
+                maxLines: 3,
+                fontSize: 13,
+                textColor: getColor(context, "textLight"),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsetsDirectional.only(top: 5),
@@ -323,6 +349,22 @@ class _ExchangeRatesState extends State<ExchangeRates> {
                                               fontSize: 16,
                                             ),
                                           ),
+                                          if (!isCustomCurrency &&
+                                              !currencyHasExchangeRate(key))
+                                            TextSpan(
+                                              text: "  " +
+                                                  "no-exchange-rate".tr(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily:
+                                                    appStateSettings["font"],
+                                                fontFamilyFallback: ['Inter'],
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .error,
+                                                fontSize: 13,
+                                              ),
+                                            ),
                                         ],
                                       ),
                                     ),
@@ -453,4 +495,73 @@ bool checkIfExchangeRateChangeAfter() {
   } else {
     return false;
   }
+}
+
+
+// Cashew Desktop: shown where a currency without an exchange rate is used.
+// Amounts in it are converted as 1 = 1 USD until a custom rate is set.
+class MissingExchangeRateWarning extends StatelessWidget {
+  const MissingExchangeRateWarning(
+      {required this.currencyKey, this.onRateSet, super.key});
+  final String currencyKey;
+  final VoidCallback? onRateSet;
+
+  @override
+  Widget build(BuildContext context) {
+    if (currencyHasExchangeRate(currencyKey)) return SizedBox.shrink();
+    return Tappable(
+      color: Theme.of(context).colorScheme.errorContainer,
+      borderRadius: 15,
+      onTap: () async {
+        await openBottomSheet(
+          context,
+          SetCustomCurrency(currencyKey: currencyKey),
+        );
+        onRateSet?.call();
+      },
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: 15, vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              appStateSettings["outlinedIcons"]
+                  ? Icons.warning_amber_outlined
+                  : Icons.warning_amber_rounded,
+              color: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: TextFont(
+                text: "no-exchange-rate-description"
+                    .tr(namedArgs: {"currency": currencyKey.toUpperCase()}),
+                maxLines: 5,
+                fontSize: 14,
+                textColor: Theme.of(context).colorScheme.onErrorContainer,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// "Rates from Oct 22, 2026 · updated 2 hours ago (cdn.jsdelivr.net)"
+String? exchangeRatesDateText(BuildContext context) {
+  String? date = appStateSettings["cachedCurrencyExchangeDate"];
+  String? fetched = appStateSettings["cachedCurrencyExchangeFetched"];
+  String? source = appStateSettings["cachedCurrencyExchangeSource"];
+  DateTime? dateParsed = date == null ? null : DateTime.tryParse(date);
+  DateTime? fetchedParsed = fetched == null ? null : DateTime.tryParse(fetched);
+  if (dateParsed == null && fetchedParsed == null) return null;
+  List<String> parts = [];
+  if (dateParsed != null)
+    parts.add("exchange-rates-from".tr(namedArgs: {
+      "date": DateFormat.yMMMMd(context.locale.toString()).format(dateParsed)
+    }));
+  if (fetchedParsed != null)
+    parts.add("exchange-rates-updated"
+        .tr(namedArgs: {"time": getTimeAgo(fetchedParsed).toLowerCase()}));
+  return parts.join(" · ") + (source == null ? "" : "\n" + source);
 }
