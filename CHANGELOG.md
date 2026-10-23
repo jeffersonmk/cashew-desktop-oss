@@ -14,6 +14,8 @@ How to use:
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-10-23
+
 ### Added
 - Exchange rates: currencies the rates API has no rate for (about 200 of
   the crypto list, e.g. TON, WBTC, MATIC) are now marked "No exchange rate"
@@ -213,7 +215,8 @@ First release of Cashew Desktop, a fork of
 ### Fixed
 - Startup on Linux (notifications and time zone detection).
 
-[Unreleased]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.7...HEAD
+[Unreleased]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.8...HEAD
+[1.0.8]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/jeffersonmk/cashew-desktop-oss/compare/v1.0.4...v1.0.5
