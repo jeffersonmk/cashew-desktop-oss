@@ -15,6 +15,9 @@ How to use:
 ## [Unreleased]
 
 ### Fixed
+- Side menu clock: the time no longer fades out on its right side (e.g.
+  "11:2" with a faded "2") when the side menu is narrow; the whole time
+  now fits, shrinking a little if needed.
 - Installments of a goal or loan set to "until goal reached" / "until loan
   paid off" now stop once the goal is reached or the loan is settled. Before
   (also in the original Cashew) a new installment was created forever: the

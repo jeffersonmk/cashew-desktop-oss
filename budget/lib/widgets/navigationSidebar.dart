@@ -380,39 +380,44 @@ class SidebarClock extends StatelessWidget {
                     children: [
                       isSetting24HourFormat() ??
                               isSystem24HourFormat(context) == true
-                          ? TextFont(
-                              textColor: getColor(context, "black"),
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                              // Remove any am/pm indication by substring
-                              // Add extra spaces so substring never fails
-                              text: (getWordedTime(null, now) + "      ")
-                                  .substring(0, 5)
-                                  .trim(),
-                              maxLines: 1,
-                              overflow: TextOverflow.fade,
-                              softWrap: false,
+                          ? FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: TextFont(
+                                textColor: getColor(context, "black"),
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                                // Remove any am/pm indication by substring
+                                // Add extra spaces so substring never fails
+                                text: (getWordedTime(null, now) + "      ")
+                                    .substring(0, 5)
+                                    .trim(),
+                                maxLines: 1,
+                                softWrap: false,
+                              ),
                             )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Flexible(
-                                  child: TextFont(
+                          // Cashew Desktop: the two parts used to be
+                          // Flexible, so each got at most half of the width
+                          // and the time faded out on its right side. Now
+                          // the whole line keeps its size and only shrinks
+                          // (FittedBox) when the sidebar is too narrow.
+                          : FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  TextFont(
                                     textColor: getColor(context, "black"),
                                     fontSize: 45,
                                     fontWeight: FontWeight.bold,
                                     // Remove any am/pm indication by substring
-                                    text: getWordedTime(null, now)
+                                    text: (getWordedTime(null, now) + "      ")
                                         .substring(0, 5)
                                         .trim(),
                                     maxLines: 1,
-                                    overflow: TextOverflow.fade,
                                     softWrap: false,
                                   ),
-                                ),
-                                Flexible(
-                                  child: Padding(
+                                  Padding(
                                     padding: const EdgeInsetsDirectional.only(
                                         bottom: 4.4, start: 7),
                                     child: TextFont(
@@ -421,12 +426,11 @@ class SidebarClock extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                       text: getMeridiemString(now),
                                       maxLines: 1,
-                                      overflow: TextOverflow.fade,
                                       softWrap: false,
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                       TextFont(
                         textColor: getColor(context, "black").withOpacity(0.5),
